@@ -1,0 +1,1921 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="theme-color" content="#120d0c">
+<title>Pomfret Griffins — Game Scorebook</title>
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'%3E%3Crect width='64' height='64' fill='%23120d0c'/%3E%3Cpath fill='%23d0122d' d='M10 46c8-18 18-28 22-30 2 6 8 10 14 10-6 4-8 10-8 16-6 2-12 8-16 14-8-2-12-6-12-10z'/%3E%3Cpath fill='%23f3ecdf' d='M14 40c2-10 10-16 18-16 4 4 10 6 14 4-8 6-10 14-8 22-8-2-16-6-24-10z'/%3E%3C/svg>">
+<style>
+  :root {
+    --ink: #16110f;
+    --black: #120d0c;
+    --red: #d0122d;
+    --red-deep: #8d0c1e;
+    --cream: #f4eee4;
+    --paper: #fbf6ee;
+    --line: rgba(18, 13, 12, 0.16);
+    --muted: #5e564f;
+    --shadow: 4px 4px 0 var(--black);
+  }
+
+  * { box-sizing: border-box; }
+  html { scroll-behavior: smooth; }
+  body {
+    margin: 0;
+    background:
+      radial-gradient(circle at 1px 1px, rgba(18, 13, 12, 0.045) 1px, transparent 0) 0 0 / 14px 14px,
+      var(--cream);
+    color: var(--ink);
+    font-family: "Avenir Next Condensed", "Arial Narrow", "Helvetica Neue", sans-serif;
+    font-size: 17px;
+    line-height: 1.35;
+  }
+  button, input, select { font: inherit; color: inherit; }
+  button { cursor: pointer; }
+  :focus-visible { outline: 2px solid var(--red); outline-offset: 2px; }
+  h1, h2, h3, p { margin: 0; }
+
+  .band { height: 8px; background: var(--red); }
+  header.top {
+    background: var(--black);
+    color: var(--cream);
+  }
+  .top-inner, main {
+    width: min(1120px, calc(100% - 28px));
+    margin: 0 auto;
+  }
+  .top-inner {
+    display: flex;
+    align-items: center;
+    gap: 18px;
+    padding: 22px 0 20px;
+  }
+  .crest { width: 78px; height: 78px; flex: 0 0 auto; }
+  .brand { min-width: 0; }
+  .eyebrow {
+    letter-spacing: 0.22em;
+    font-size: 13px;
+    font-weight: 700;
+    color: var(--red);
+  }
+  h1 {
+    font-size: clamp(40px, 7vw, 68px);
+    line-height: 0.86;
+    letter-spacing: 0.02em;
+    text-transform: uppercase;
+    font-weight: 800;
+  }
+  .tag {
+    margin-top: 6px;
+    letter-spacing: 0.14em;
+    text-transform: uppercase;
+    font-size: 13px;
+    color: rgba(244, 238, 228, 0.78);
+  }
+  .lede-wrap { background: var(--black); color: var(--cream); border-top: 1px solid rgba(244, 238, 228, 0.12); }
+  .lede {
+    width: min(1120px, calc(100% - 28px));
+    margin: 0 auto;
+    padding: 0 0 18px;
+    max-width: 62ch;
+    color: rgba(244, 238, 228, 0.88);
+  }
+
+  main { padding: 18px 0 56px; }
+  .panel {
+    background: var(--paper);
+    border: 1px solid var(--black);
+    box-shadow: var(--shadow);
+    padding: 14px;
+    margin-bottom: 16px;
+  }
+  .kicker {
+    display: inline-block;
+    font-size: 12px;
+    font-weight: 800;
+    letter-spacing: 0.16em;
+    text-transform: uppercase;
+    border-bottom: 2px solid var(--red);
+    margin-bottom: 10px;
+  }
+  .meta {
+    display: grid;
+    grid-template-columns: 150px 1fr 1fr auto;
+    gap: 10px;
+    align-items: end;
+  }
+  .field { display: flex; flex-direction: column; gap: 4px; font-size: 12px; font-weight: 800; letter-spacing: 0.08em; text-transform: uppercase; }
+  input[type="text"], input[type="date"], select {
+    background: #fff;
+    border: 1px solid var(--black);
+    border-radius: 0;
+    padding: 8px 10px;
+    width: 100%;
+    text-transform: none;
+    letter-spacing: 0;
+    font-weight: 600;
+    font-size: 16px;
+  }
+  .seg { display: flex; border: 1px solid var(--black); }
+  .seg button {
+    background: #fff;
+    border: 0;
+    padding: 8px 14px;
+    font-weight: 800;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+  }
+  .seg button + button { border-left: 1px solid var(--black); }
+  .seg button.on { background: var(--black); color: var(--cream); }
+  .seg button:disabled:not(.on) { opacity: 0.4; cursor: not-allowed; }
+  .seg button.on:disabled { cursor: default; }
+
+  .toolbar { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 12px; }
+  .btn, .pad button, .mini {
+    border: 2px solid var(--black);
+    background: #fff;
+    min-height: 42px;
+    padding: 8px 12px;
+    font-weight: 800;
+    letter-spacing: 0.04em;
+    text-transform: uppercase;
+  }
+  .btn.primary, .pad button.hit { background: var(--black); color: var(--cream); }
+  .btn.danger, .pad button.hr { background: var(--red); color: white; border-color: var(--red-deep); }
+  .btn.ghost, .mini { background: transparent; }
+  .btn:active, .pad button:active, .mini:active { transform: translateY(1px); }
+
+  .board { padding: 0; overflow: hidden; }
+  .board .kicker { margin: 14px 14px 0; }
+  .board-scroll { overflow-x: auto; padding: 10px 14px 14px; }
+  table { border-collapse: collapse; width: 100%; }
+  .linescore { min-width: 640px; background: var(--black); color: var(--cream); }
+  .linescore th, .linescore td {
+    border: 1px solid rgba(244, 238, 228, 0.16);
+    text-align: center;
+    padding: 7px 0;
+    font-variant-numeric: tabular-nums;
+    min-width: 34px;
+    font-weight: 700;
+  }
+  .linescore th { color: rgba(244, 238, 228, 0.62); font-size: 12px; letter-spacing: 0.08em; font-weight: 800; }
+  .linescore .team {
+    text-align: left;
+    padding-left: 10px;
+    min-width: 92px;
+    letter-spacing: 0.08em;
+  }
+  .linescore tr.pom .team { color: #ff4d63; }
+  .linescore td.now { box-shadow: inset 0 -3px 0 var(--red); }
+  .linescore .tot { background: #2a1719; color: white; }
+
+  .layout {
+    display: grid;
+    grid-template-columns: minmax(300px, 400px) minmax(0, 1fr);
+    gap: 16px;
+    align-items: start;
+  }
+  .park-layout {
+    display: grid;
+    grid-template-columns: minmax(180px, 230px) minmax(0, 1fr);
+    gap: 16px;
+    align-items: start;
+  }
+  .park-card .who-name { font-size: clamp(28px, 3vw, 40px); }
+  .park-scroll { overflow-x: auto; }
+  .park {
+    position: relative;
+    width: min(820px, 100%);
+    min-width: 680px;
+    margin: 0 auto;
+    background: #241816;
+    border: 1px solid #120d0c;
+    box-shadow: 4px 4px 0 #120d0c;
+    container-type: inline-size;
+    line-height: 0;
+  }
+  .park-art { width: 100%; height: auto; display: block; }
+  .slots { position: absolute; inset: 0; line-height: 1.15; }
+  .slot {
+    position: absolute;
+    transform: translate(-50%, -50%);
+    width: 9cqw;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 3px;
+    z-index: 2;
+  }
+  .mark {
+    width: clamp(36px, 5.2cqw, 46px);
+    height: clamp(36px, 5.2cqw, 46px);
+    border-radius: 50%;
+    border: 2px solid rgba(244, 238, 228, 0.8);
+    background: rgba(18, 13, 12, 0.62);
+    color: #f4eee4;
+    display: grid;
+    place-items: center;
+    font-weight: 800;
+    font-size: clamp(12px, 2.4cqw, 18px);
+    letter-spacing: 0.04em;
+    box-shadow: 0 2px 0 rgba(0, 0, 0, 0.35);
+  }
+  .mark-icon {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    border-radius: 50%;
+    grid-area: 1 / 1;
+  }
+  .mark-num { grid-area: 1 / 1; }
+  .mark:has(.mark-icon) .mark-num { visibility: hidden; }
+  .slot-name {
+    font-size: clamp(10px, 1.7cqw, 13px);
+    font-weight: 800;
+    letter-spacing: 0.06em;
+    text-transform: uppercase;
+    color: #f4eee4;
+    text-shadow: 0 1px 2px rgba(0, 0, 0, 0.85);
+    background: rgba(18, 13, 12, 0.55);
+    padding: 0 5px;
+    min-height: 1.1em;
+  }
+  .slot.filled .mark {
+    background: #f4eee4;
+    color: #120d0c;
+    border-color: #f4eee4;
+  }
+  .slot.is-up .mark { box-shadow: 0 0 0 3px #d0122d; }
+  .base-slot { z-index: 3; }
+  .base-slot .mark {
+    background: rgba(18, 13, 12, 0.2);
+    border-style: dashed;
+    border-color: rgba(255, 255, 255, 0.9);
+    color: transparent;
+  }
+  .base-slot .slot-name { background: transparent; text-shadow: 0 1px 2px rgba(0, 0, 0, 0.9); }
+  .base-slot.on .mark {
+    background: #d0122d;
+    color: white;
+    border-style: solid;
+    border-color: #fff;
+  }
+  .base-slot.on .slot-name { background: rgba(18, 13, 12, 0.72); }
+  .base-slot:not(.on) .slot-name { display: none; }
+  .slot-ab { z-index: 4; }
+  .slot-ab.at-bat .mark {
+    background: #d0122d;
+    color: white;
+    border-color: #fff;
+    box-shadow: 0 0 0 4px rgba(208, 18, 45, 0.45);
+  }
+  .slot-cf { left: 50%; top: 25%; }
+  .slot-lf { left: 25%; top: 41%; }
+  .slot-rf { left: 75%; top: 41%; }
+  .slot-ss { left: 42%; top: 64%; }
+  .slot-2b { left: 58%; top: 64%; }
+  .slot-3b { left: 34.5%; top: 67.5%; }
+  .slot-1b { left: 65.5%; top: 67.5%; }
+  .slot-p { left: 50%; top: 76.8%; }
+  .slot-c { left: 50%; top: 94.5%; }
+  .slot-name:empty { background: transparent; padding: 0; }
+  .slot-ab { left: 45%; top: 86.8%; }
+  .slot-b2 { left: 50%; top: 64.4%; }
+  .slot-b1 { left: 60%; top: 74.5%; }
+  .slot-b3 { left: 40%; top: 74.5%; }
+  .who { font-size: 12px; font-weight: 800; letter-spacing: 0.16em; text-transform: uppercase; color: var(--red-deep); }
+  .who-name { font-size: clamp(28px, 4vw, 40px); line-height: 0.95; text-transform: uppercase; font-weight: 800; }
+  .who-meta { color: var(--muted); font-weight: 700; margin-top: 4px; }
+  .slash { display: flex; gap: 14px; margin-top: 8px; font-variant-numeric: tabular-nums; }
+  .slash b { display: block; font-size: 20px; }
+  .slash span { font-size: 11px; letter-spacing: 0.12em; font-weight: 800; color: var(--muted); }
+  .count {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 8px;
+    margin: 4px 0 12px;
+  }
+  .lamp {
+    border: 1px solid var(--black);
+    text-align: center;
+    padding: 8px 4px 10px;
+    background: #fff;
+  }
+  .lamp strong {
+    display: block;
+    font-size: 34px;
+    line-height: 1;
+    font-variant-numeric: tabular-nums;
+  }
+  .lamp em { font-style: normal; font-size: 11px; letter-spacing: 0.14em; font-weight: 800; }
+  .pips { display: flex; gap: 4px; justify-content: center; margin-top: 6px; }
+  .pip { width: 8px; height: 8px; border: 1px solid var(--black); background: transparent; }
+  .pip.on { background: var(--red); border-color: var(--red); }
+
+
+  .last {
+    min-height: 44px;
+    border-left: 4px solid var(--red);
+    padding: 6px 10px;
+    background: #fff;
+    margin: 12px 0;
+    font-weight: 700;
+  }
+  .last small { display: block; letter-spacing: 0.14em; font-size: 11px; color: var(--muted); }
+
+  .group { margin-bottom: 10px; }
+  .group p { font-size: 11px; font-weight: 800; letter-spacing: 0.14em; text-transform: uppercase; margin-bottom: 6px; color: var(--muted); }
+  .pad { display: grid; gap: 8px; }
+  .g4 { grid-template-columns: repeat(4, 1fr); }
+  .g3 { grid-template-columns: repeat(3, 1fr); }
+  .g2 { grid-template-columns: repeat(2, 1fr); }
+  .pad button { min-height: 48px; }
+  .switch {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    font-weight: 800;
+    letter-spacing: 0.04em;
+    text-transform: uppercase;
+    font-size: 13px;
+    margin: 4px 0 12px;
+  }
+  #chooser { display: flex; flex-wrap: wrap; gap: 8px; align-items: center; margin-bottom: 10px; }
+  #chooser[hidden] { display: none; }
+  #chooser strong { letter-spacing: 0.08em; text-transform: uppercase; font-size: 13px; }
+
+  .log { list-style: none; margin: 0; padding: 0; max-height: 240px; overflow: auto; }
+  .log li { padding: 7px 0; border-bottom: 1px solid var(--line); font-variant-numeric: tabular-nums; }
+  .log li:first-child { font-weight: 800; }
+  .empty { color: var(--muted); font-weight: 700; }
+
+  .book-scroll { overflow-x: auto; }
+  .stats { min-width: 640px; font-variant-numeric: tabular-nums; }
+  .stats th, .stats td { text-align: right; padding: 4px 5px; border-bottom: 1px solid var(--line); white-space: nowrap; font-size: 15px; }
+  .stats th { font-size: 11px; letter-spacing: 0.08em; text-transform: uppercase; color: var(--muted); font-weight: 800; }
+  .stats td.who, .stats th.who, .stats td.ord, .stats th.ord { text-align: left; }
+  .stats input, .stats select {
+    border: 0;
+    background: transparent;
+    padding: 4px 2px;
+    min-width: 0;
+  }
+  .stats input[type="text"] { width: 7.2rem; border-bottom: 1px solid transparent; }
+  .stats input.num { width: 42px; }
+  .stats input:focus, .stats select:focus { border-bottom-color: var(--red); outline: none; }
+  .stats tr.active { background: #f8e4e6; }
+  .stats tr.due { box-shadow: inset 3px 0 0 var(--red); }
+  .stats tfoot td { font-weight: 800; border-top: 2px solid var(--black); border-bottom: 0; }
+  .rowbtns { display: flex; gap: 2px; }
+  .mini { min-height: 28px; padding: 2px 6px; font-size: 12px; letter-spacing: 0; }
+
+  .played { margin-top: 8px; color: var(--muted); font-size: 14px; }
+  .games { list-style: none; padding: 0; margin: 8px 0 0; }
+  .games li { display: flex; justify-content: space-between; gap: 8px; align-items: center; border-bottom: 1px solid var(--line); padding: 6px 0; }
+  .wl { font-weight: 800; color: var(--red-deep); width: 1.2em; }
+
+  .legend { display: grid; grid-template-columns: 1.1fr 0.9fr; gap: 18px; }
+  .legend h3 { font-size: 16px; letter-spacing: 0.08em; text-transform: uppercase; margin-bottom: 6px; }
+  .legend ul { margin: 0; padding-left: 18px; }
+  .legend li { margin: 4px 0; }
+  footer.note { color: var(--muted); font-size: 14px; margin-top: 8px; }
+  kbd {
+    border: 1px solid var(--black);
+    padding: 0 4px;
+    font-family: inherit;
+    font-weight: 800;
+    background: #fff;
+  }
+
+  #toast {
+    position: fixed;
+    bottom: 16px;
+    left: 50%;
+    transform: translateX(-50%);
+    background: var(--black);
+    color: var(--cream);
+    border-left: 4px solid var(--red);
+    padding: 10px 14px;
+    z-index: 5;
+    font-weight: 700;
+  }
+  #toast[hidden] { display: none; }
+
+  @media (max-width: 900px) {
+    .meta, .layout, .legend, .park-layout { grid-template-columns: 1fr; }
+    .g4 { grid-template-columns: repeat(2, 1fr); }
+  }
+  @media (max-width: 560px) {
+    .top-inner { gap: 12px; }
+    .crest { width: 62px; height: 62px; }
+    .g3 { grid-template-columns: 1fr 1fr; }
+    .count { gap: 6px; }
+    .lamp strong { font-size: 28px; }
+  }
+  @media print {
+    .band, .toolbar, .pad, .group, .switch, #chooser, .rowbtns, #toast, .lede-wrap { display: none !important; }
+    body { background: white; }
+    .panel { box-shadow: none; }
+    header.top { color: black; background: white; }
+  }
+  @media (prefers-reduced-motion: reduce) {
+    * { scroll-behavior: auto !important; transition: none !important; }
+  }
+</style>
+</head>
+<body>
+  <div class="band"></div>
+  <header class="top">
+    <div class="top-inner">
+      <svg class="crest" viewBox="0 0 80 80" role="img" aria-label="Pomfret Griffins">
+        <circle cx="40" cy="40" r="38" fill="#f4eee4"/>
+        <circle cx="40" cy="40" r="34" fill="#120d0c"/>
+        <circle cx="40" cy="40" r="31.2" fill="none" stroke="#d0122d" stroke-width="1.8"/>
+        <path fill="#d0122d" d="M15 48c8-12 16-18 24-18-8 7-13 15-15 26-4-1-7-4-9-8z"/>
+        <path fill="#d0122d" d="M14 57c9-1 17-8 22-17-3 10-9 17-18 21-2-1-4-2-4-4z"/>
+        <path fill="#f4eee4" d="M28 58c3-16 14-28 30-29-4 9-12 16-18 23-3 8-7 13-12 16v-10z"/>
+        <path fill="#f4eee4" d="M50 31c5-7 13-10 17-8 1 5 4 8 4 8 5 1 9 5 9 9-7 1-13-1-17-5-5 4-9 5-14 7 1-5 1-8 1-11z"/>
+        <path fill="#f4eee4" d="M60 20c2-8 7-11 9-8-3 4-5 9-5 13-2-1-4-3-4-5z"/>
+        <path fill="#d0122d" d="M74 33c5 0 8 2 10 4-6 2-11 1-13-1 0-2 1-3 3-3z"/>
+        <path fill="#f4eee4" d="M72 39c6 2 10 4 12 6-7 2-13 0-15-2 0-2 1-3 3-4z"/>
+        <circle cx="64" cy="33.5" r="2.3" fill="#120d0c"/>
+        <circle cx="64.8" cy="32.8" r="0.75" fill="#f4eee4"/>
+        <path fill="#d0122d" d="M30 60c8 2 10 8 8 14-7-3-12-8-10-14h2z"/>
+      </svg>
+      <div class="brand">
+        <div class="eyebrow">Pomfret baseball</div>
+        <h1>Griffins</h1>
+        <div class="tag">Game scorebook · Red and black</div>
+      </div>
+    </div>
+  </header>
+  <div class="lede-wrap">
+    <p class="lede">Take the count, tap the play, and the line score, batting line, and pitching line update with the inning. Everything stays in this browser.</p>
+  </div>
+
+  <main>
+    <section class="panel" aria-label="Game setup">
+      <div class="kicker">This game</div>
+      <div class="meta">
+        <label class="field">Date
+          <input id="date" type="date">
+        </label>
+        <label class="field">Opponent
+          <input id="opponent" type="text" maxlength="32" placeholder="Opponent" autocomplete="off" spellcheck="false">
+        </label>
+        <label class="field">Field
+          <input id="site" type="text" maxlength="32" placeholder="Field" autocomplete="off" spellcheck="false">
+        </label>
+        <div class="field">Pomfret is
+          <div class="seg" id="side" role="group" aria-label="Pomfret is">
+            <button type="button" id="side-away">Away</button>
+            <button type="button" id="side-home">Home</button>
+          </div>
+        </div>
+      </div>
+      <div class="toolbar">
+        <button type="button" class="btn" id="new-game">New game</button>
+        <button type="button" class="btn" id="undo">Undo</button>
+        <button type="button" class="btn primary" id="copy">Copy book</button>
+        <button type="button" class="btn danger" id="save-season">Save to season</button>
+        <button type="button" class="btn ghost" id="backup">Backup</button>
+        <button type="button" class="btn ghost" id="restore">Restore</button>
+        <input id="restore-file" type="file" accept="application/json" hidden>
+      </div>
+    </section>
+
+    <section class="panel board" aria-label="Line score">
+      <div class="kicker">Line score</div>
+      <div class="board-scroll">
+        <table class="linescore" id="linescore"></table>
+      </div>
+    </section>
+
+    <section class="panel" aria-label="Field">
+      <div class="kicker">Field</div>
+      <div class="park-layout">
+        <aside class="park-card">
+          <div class="who" id="who-role">Now batting</div>
+          <div class="who-name" id="who-name">Batter 1</div>
+          <div class="who-meta" id="who-meta"></div>
+          <div class="slash" id="who-slash"></div>
+          <div class="mound" id="mound"></div>
+        </aside>
+        <div class="park-scroll">
+          <div class="park" id="diamond">
+            <svg class="park-art" viewBox="0 0 1000 1000" role="img" aria-label="Ballpark">
+              <defs>
+                <radialGradient id="grassGrad" cx="50%" cy="38%" r="75%">
+                  <stop offset="0%" stop-color="#3c9d4c"/>
+                  <stop offset="55%" stop-color="#1f7a36"/>
+                  <stop offset="100%" stop-color="#14612b"/>
+                </radialGradient>
+                <radialGradient id="dirtGrad" cx="50%" cy="55%" r="70%">
+                  <stop offset="0%" stop-color="#e0b888"/>
+                  <stop offset="100%" stop-color="#b8895c"/>
+                </radialGradient>
+                <linearGradient id="inGrass" x1="0" y1="0" x2="0" y2="1">
+                  <stop offset="0%" stop-color="#2f8f42"/>
+                  <stop offset="100%" stop-color="#1c7132"/>
+                </linearGradient>
+              </defs>
+              <rect width="1000" height="1000" fill="#241816"/>
+              <path fill="url(#grassGrad)" d="M70 450 Q500 -190 930 450 L500 880 Z"/>
+              <path d="M96 438 Q500 -40 904 438" fill="none" stroke="#0f4e22" stroke-width="18" opacity="0.55"/>
+              <path d="M140 400 Q500 40 860 400" fill="none" stroke="#4eae5c" stroke-width="8" opacity="0.16"/>
+              <path d="M200 340 Q500 90 800 340" fill="none" stroke="#145628" stroke-width="10" opacity="0.22"/>
+              <path fill="url(#dirtGrad)" d="M500 906 L644 762 L500 618 L356 762 Z"/>
+              <path fill="url(#inGrass)" d="M500 834 L572 762 L500 690 L428 762 Z"/>
+              <ellipse cx="500" cy="868" rx="46" ry="26" fill="#c99764"/>
+              <circle cx="500" cy="768" r="18" fill="#c49262" stroke="#a67a4e" stroke-width="2"/>
+              <rect x="492" y="764" width="16" height="5" fill="#f4eee4"/>
+              <rect x="438" y="850" width="24" height="36" fill="none" stroke="#f6f1e8" stroke-width="2"/>
+              <rect x="538" y="850" width="24" height="36" fill="none" stroke="#f6f1e8" stroke-width="2"/>
+              <line x1="500" y1="880" x2="70" y2="450" stroke="#f6f1e8" stroke-width="2.5"/>
+              <line x1="500" y1="880" x2="930" y2="450" stroke="#f6f1e8" stroke-width="2.5"/>
+              <polyline points="500,880 618,762 500,644 382,762 500,880" fill="none" stroke="#f6f1e8" stroke-width="2.5"/>
+              <rect x="610" y="754" width="16" height="16" fill="#fbf7f1" stroke="#120d0c" stroke-width="1.5" transform="rotate(45 618 762)"/>
+              <rect x="492" y="636" width="16" height="16" fill="#fbf7f1" stroke="#120d0c" stroke-width="1.5" transform="rotate(45 500 644)"/>
+              <rect x="374" y="754" width="16" height="16" fill="#fbf7f1" stroke="#120d0c" stroke-width="1.5" transform="rotate(45 382 762)"/>
+              <path d="M492 864 H508 V876 L500 888 Z" fill="#fbf7f1" stroke="#120d0c" stroke-width="1.5"/>
+              <line x1="70" y1="450" x2="70" y2="418" stroke="#d0122d" stroke-width="4"/>
+              <line x1="930" y1="450" x2="930" y2="418" stroke="#d0122d" stroke-width="4"/>
+              <path d="M70 418 L86 426 L70 434" fill="#d0122d"/>
+              <path d="M930 418 L914 426 L930 434" fill="#d0122d"/>
+            </svg>
+            <!-- Player icons go inside each .mark, as img.mark-icon. The number hides once an icon is there. -->
+            <div class="slots">
+              <div class="slot slot-cf" id="pos-CF"><div class="mark"><span class="mark-num">CF</span></div><span class="slot-name"></span></div>
+              <div class="slot slot-lf" id="pos-LF"><div class="mark"><span class="mark-num">LF</span></div><span class="slot-name"></span></div>
+              <div class="slot slot-rf" id="pos-RF"><div class="mark"><span class="mark-num">RF</span></div><span class="slot-name"></span></div>
+              <div class="slot slot-ss" id="pos-SS"><div class="mark"><span class="mark-num">SS</span></div><span class="slot-name"></span></div>
+              <div class="slot slot-2b" id="pos-2B"><div class="mark"><span class="mark-num">2B</span></div><span class="slot-name"></span></div>
+              <div class="slot slot-3b" id="pos-3B"><div class="mark"><span class="mark-num">3B</span></div><span class="slot-name"></span></div>
+              <div class="slot slot-1b" id="pos-1B"><div class="mark"><span class="mark-num">1B</span></div><span class="slot-name"></span></div>
+              <div class="slot slot-p" id="pos-P"><div class="mark"><span class="mark-num">P</span></div><span class="slot-name"></span></div>
+              <div class="slot slot-c" id="pos-C"><div class="mark"><span class="mark-num">C</span></div><span class="slot-name"></span></div>
+              <div class="slot slot-ab" id="pos-AB"><div class="mark"><span class="mark-num">AB</span></div><span class="slot-name"></span></div>
+              <div class="slot base-slot slot-b2" id="base-2"><div class="mark"><span class="mark-num"></span></div><span class="slot-name">2nd</span></div>
+              <div class="slot base-slot slot-b3" id="base-3"><div class="mark"><span class="mark-num"></span></div><span class="slot-name">3rd</span></div>
+              <div class="slot base-slot slot-b1" id="base-1"><div class="mark"><span class="mark-num"></span></div><span class="slot-name">1st</span></div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <div class="layout">
+      <section class="panel" aria-label="Live play">
+        <div class="kicker">Live play</div>
+        <div class="count" aria-label="Count">
+          <div class="lamp"><strong id="ball-num">0</strong><em>Balls</em><div class="pips" id="ball-pips"></div></div>
+          <div class="lamp"><strong id="strike-num">0</strong><em>Strikes</em><div class="pips" id="strike-pips"></div></div>
+          <div class="lamp"><strong id="out-num">0</strong><em>Outs</em><div class="pips" id="out-pips"></div></div>
+        </div>
+        <div class="last" id="last" aria-live="polite"><small>Last play</small><span id="last-text">No pitches yet.</span></div>
+
+        <div class="group">
+          <p>Count</p>
+          <div class="pad g3">
+            <button type="button" data-act="ball">Ball</button>
+            <button type="button" data-act="strike">Strike</button>
+            <button type="button" data-act="foul">Foul</button>
+          </div>
+        </div>
+        <div class="group">
+          <p>Hits</p>
+          <div class="pad g4">
+            <button type="button" class="hit" data-act="hit" data-n="1">Single</button>
+            <button type="button" class="hit" data-act="hit" data-n="2">Double</button>
+            <button type="button" class="hit" data-act="hit" data-n="3">Triple</button>
+            <button type="button" class="hr" data-act="hit" data-n="4">Home run</button>
+          </div>
+        </div>
+        <div class="group">
+          <p>On base</p>
+          <div class="pad g4">
+            <button type="button" data-act="walk">Walk</button>
+            <button type="button" data-act="hbp">Hit by pitch</button>
+            <button type="button" data-act="error">On error</button>
+            <button type="button" data-act="fc">Fielder's choice</button>
+          </div>
+        </div>
+        <div class="group">
+          <p>Outs</p>
+          <div class="pad g4">
+            <button type="button" data-act="k">Strikeout</button>
+            <button type="button" data-act="out" data-kind="grounded out">Groundout</button>
+            <button type="button" data-act="out" data-kind="flew out">Flyout</button>
+            <button type="button" data-act="out" data-kind="lined out">Lineout</button>
+            <button type="button" data-act="out" data-kind="popped out">Popup</button>
+            <button type="button" data-act="sac">Sacrifice</button>
+            <button type="button" data-act="dp">Double play</button>
+            <button type="button" data-act="manual-out">Manual out</button>
+          </div>
+        </div>
+        <div class="group">
+          <p>Runners</p>
+          <div class="pad g4">
+            <button type="button" data-act="sb">Stolen base</button>
+            <button type="button" data-act="cs">Caught stealing</button>
+            <button type="button" data-act="wp">Wild pitch</button>
+            <button type="button" data-act="eadv">Error, advance</button>
+          </div>
+        </div>
+        <label class="switch"><input type="checkbox" id="advance"> Advance runners on outs</label>
+        <div id="chooser" hidden>
+          <strong id="chooser-label"></strong>
+          <span id="chooser-options"></span>
+        </div>
+        <div class="toolbar">
+          <button type="button" class="btn ghost" data-act="run">Score a run</button>
+          <button type="button" class="btn ghost" data-act="clear-bases">Clear bases</button>
+        </div>
+
+        <div class="kicker" style="margin-top:16px">Play log</div>
+        <ol class="log" id="log" reversed></ol>
+      </section>
+
+      <div>
+        <section class="panel" aria-label="Batting">
+          <div class="kicker">Pomfret batting</div>
+          <div class="book-scroll">
+            <table class="stats" id="lineup">
+              <thead>
+                <tr>
+                  <th class="ord"></th>
+                  <th>#</th>
+                  <th class="who">Player</th>
+                  <th>Pos</th>
+                  <th>AB</th><th>R</th><th>H</th><th>2B</th><th>3B</th><th>HR</th><th>RBI</th><th>BB</th><th>SO</th><th>AVG</th>
+                </tr>
+              </thead>
+              <tbody id="lineup-body"></tbody>
+              <tfoot id="lineup-foot"></tfoot>
+            </table>
+          </div>
+          <div class="toolbar">
+            <button type="button" class="btn ghost" id="add-batter">Add batter</button>
+          </div>
+          <div class="played" id="played"></div>
+        </section>
+
+        <section class="panel" aria-label="Pitching">
+          <div class="kicker">Pomfret pitching</div>
+          <div class="book-scroll">
+            <table class="stats" id="pitching">
+              <thead>
+                <tr>
+                  <th>#</th>
+                  <th class="who">Pitcher</th>
+                  <th>IP</th><th>H</th><th>R</th><th>ER</th><th>BB</th><th>SO</th><th>PC</th><th>ERA</th>
+                </tr>
+              </thead>
+              <tbody id="pitch-body"></tbody>
+            </table>
+          </div>
+          <div class="toolbar">
+            <button type="button" class="btn ghost" id="add-pitcher">New pitcher</button>
+          </div>
+        </section>
+      </div>
+    </div>
+
+    <section class="panel" aria-label="Season">
+      <div class="kicker">Season</div>
+      <p id="season-blurb" class="empty">Save a game and the season line builds in this browser.</p>
+      <div class="book-scroll" id="season-bat-wrap" hidden>
+        <table class="stats" id="season-bat"></table>
+      </div>
+      <div class="book-scroll" id="season-pit-wrap" hidden style="margin-top:12px">
+        <table class="stats" id="season-pit"></table>
+      </div>
+      <ul class="games" id="season-games"></ul>
+    </section>
+
+    <section class="panel legend" aria-label="How to keep the book">
+      <div>
+        <h3>How to keep the book</h3>
+        <ul>
+          <li>Fill in the lineup, opponent, and whether Pomfret is home or away before the first pitch. The visitor bats in the top of the inning.</li>
+          <li>Ball, strike, and foul track the count. Ball four is a walk. Strike three is a strikeout. A foul at two strikes stays at two strikes.</li>
+          <li>Tap the result when the ball is put in play. Bases, outs, the score, and the player line all move together.</li>
+          <li>Stolen base, caught stealing, and wild pitch move runners and leave the at-bat open.</li>
+          <li>Turn on “Advance runners on outs” when a groundout or flyout moves every runner one base. Sacrifice is an out that is not an at-bat.</li>
+          <li>Sub keeps the player’s line and puts a new hitter in that spot. Undo takes back the last play.</li>
+        </ul>
+      </div>
+      <div>
+        <h3>What the numbers mean</h3>
+        <ul>
+          <li><b>AB</b> at-bats. Walks, hit by pitch, and sacrifices are not at-bats. Reaching on an error is an at-bat and not a hit.</li>
+          <li><b>H</b> hits. <b>AVG</b> is hits divided by at-bats. The card also shows on-base and slugging.</li>
+          <li><b>RBI</b> runs driven in on hits, walks, hit by pitch, and sacrifices. Stolen bases and errors do not add an RBI.</li>
+          <li><b>IP</b> is outs divided by three. <b>ERA</b> is earned runs per nine innings. Runs on errors are unearned.</li>
+          <li>Keys: <kbd>B</kbd> ball, <kbd>S</kbd> strike, <kbd>F</kbd> foul, <kbd>1</kbd>–<kbd>4</kbd> hits, <kbd>K</kbd> strikeout, <kbd>W</kbd> walk, <kbd>U</kbd> undo.</li>
+        </ul>
+      </div>
+    </section>
+    <footer class="note">One file. Open it in any browser. The book is saved on this device until you clear site data.</footer>
+  </main>
+  <div id="toast" hidden></div>
+
+<script>
+(() => {
+  const GAME_KEY = "pomfret-griffins-game-v1";
+  const SEASON_KEY = "pomfret-griffins-season-v1";
+  const POSITIONS = ["P", "C", "1B", "2B", "3B", "SS", "LF", "CF", "RF", "DH", "EH"];
+  const undoStack = [];
+  let state;
+
+  const $ = (id) => document.getElementById(id);
+
+  function today() {
+    const d = new Date();
+    return d.getFullYear() + "-" + String(d.getMonth() + 1).padStart(2, "0") + "-" + String(d.getDate()).padStart(2, "0");
+  }
+  function makeId(bag) {
+    bag.seq += 1;
+    return "id" + bag.seq;
+  }
+  function blankBatter(bag, pos) {
+    return {
+      id: makeId(bag), name: "", number: "", pos: pos || "",
+      ab: 0, r: 0, h: 0, doubles: 0, triples: 0, hr: 0, rbi: 0,
+      bb: 0, so: 0, hbp: 0, sac: 0, sb: 0, cs: 0
+    };
+  }
+  function blankPitcher(bag) {
+    return { id: makeId(bag), name: "", number: "", outs: 0, h: 0, r: 0, er: 0, bb: 0, so: 0, pitches: 0, current: true };
+  }
+  function defaultState() {
+    const positions = ["SS", "CF", "LF", "1B", "3B", "C", "RF", "2B", "P"];
+    const s = {
+      gameId: "g" + Date.now().toString(36),
+      date: today(),
+      opponent: "",
+      site: "",
+      pomfretHome: false,
+      inning: 1,
+      half: "top",
+      outs: 0,
+      balls: 0,
+      strikes: 0,
+      advance: false,
+      bases: [null, null, null],
+      runs: { pomfret: Array(9).fill(0), opp: Array(9).fill(0) },
+      hits: { pomfret: 0, opp: 0 },
+      errors: { pomfret: 0, opp: 0 },
+      battingIndex: 0,
+      lineup: [],
+      played: [],
+      pitchers: [],
+      log: [],
+      seq: 0
+    };
+    positions.forEach((pos) => s.lineup.push(blankBatter(s, pos)));
+    s.pitchers.push(blankPitcher(s));
+    return s;
+  }
+
+  function loadSeason() {
+    try {
+      const raw = localStorage.getItem(SEASON_KEY);
+      const parsed = raw ? JSON.parse(raw) : { games: [] };
+      if (!parsed || !Array.isArray(parsed.games)) return { games: [] };
+      return parsed;
+    } catch (e) {
+      return { games: [] };
+    }
+  }
+  function saveSeason(season) {
+    try { localStorage.setItem(SEASON_KEY, JSON.stringify(season)); } catch (e) { /* keep going */ }
+  }
+  function persist() {
+    try { localStorage.setItem(GAME_KEY, JSON.stringify(state)); } catch (e) { /* keep going */ }
+  }
+  function loadGame() {
+    try {
+      const raw = localStorage.getItem(GAME_KEY);
+      if (!raw) return defaultState();
+      const parsed = JSON.parse(raw);
+      if (!parsed || !Array.isArray(parsed.lineup) || !parsed.lineup.length) return defaultState();
+      return parsed;
+    } catch (e) {
+      return defaultState();
+    }
+  }
+
+  function snapshot() {
+    undoStack.push(JSON.stringify(state));
+    if (undoStack.length > 50) undoStack.shift();
+  }
+  function toast(msg) {
+    const t = $("toast");
+    t.textContent = msg;
+    t.hidden = false;
+    clearTimeout(toast._t);
+    toast._t = setTimeout(() => { t.hidden = true; }, 1700);
+  }
+  function sum(arr) { return arr.reduce((a, b) => a + b, 0); }
+  function pomfretBatting() {
+    return state.pomfretHome ? state.half === "bottom" : state.half === "top";
+  }
+  function battingTeam() { return pomfretBatting() ? "pomfret" : "opp"; }
+  function fieldingTeam() { return pomfretBatting() ? "opp" : "pomfret"; }
+  function currentBatter() {
+    const i = Math.min(state.battingIndex, state.lineup.length - 1);
+    return state.lineup[i];
+  }
+  function currentPitcher() {
+    return state.pitchers.find((p) => p.current) || state.pitchers[state.pitchers.length - 1];
+  }
+  function findPlayer(id) {
+    return state.lineup.find((p) => p.id === id) || state.played.find((p) => p.id === id) || null;
+  }
+  function playerLabel(p, index) {
+    const name = (p.name || "").trim() || ("Batter " + (index + 1));
+    const num = (p.number || "").trim();
+    return num ? "#" + num + " " + name : name;
+  }
+  function currentWho() {
+    if (!pomfretBatting()) return "Opponent";
+    return playerLabel(currentBatter(), state.battingIndex);
+  }
+  function labelPlayer(p) {
+    if (!p) return "Runner";
+    const live = state.lineup.indexOf(p);
+    const old = state.played.indexOf(p);
+    return playerLabel(p, live >= 0 ? live : Math.max(old, 0));
+  }
+  function gameStarted() {
+    return state.log.length > 0 || state.balls > 0 || state.strikes > 0 || state.outs > 0 ||
+      state.bases.some(Boolean) || state.inning > 1 || state.half !== "top";
+  }
+  function baseWord(dest) {
+    return ["first", "second", "third"][dest] || "home";
+  }
+  function halfLabel() {
+    return (state.half === "top" ? "Top " : "Bot ") + state.inning;
+  }
+  function scoreLine() {
+    return "POM " + sum(state.runs.pomfret) + "–" + sum(state.runs.opp);
+  }
+  function ensureInnings() {
+    const need = Math.max(9, state.inning);
+    while (state.runs.pomfret.length < need) {
+      state.runs.pomfret.push(0);
+      state.runs.opp.push(0);
+    }
+  }
+  function formatAvg(h, ab) {
+    if (!ab) return "—";
+    const v = h / ab;
+    return v >= 1 ? v.toFixed(3) : v.toFixed(3).slice(1);
+  }
+  function formatRate(num, den) {
+    if (!den) return "—";
+    const v = num / den;
+    return v >= 1 ? v.toFixed(3) : v.toFixed(3).slice(1);
+  }
+  function formatIP(outs) {
+    return Math.floor(outs / 3) + "." + (outs % 3);
+  }
+  function formatERA(p) {
+    if (!p.outs) return p.er ? "INF" : "0.00";
+    return ((27 * p.er) / p.outs).toFixed(2);
+  }
+  function oppName() {
+    return (state.opponent || "").trim() || "Opponent";
+  }
+  function oppAbbr() {
+    const n = (state.opponent || "").trim();
+    if (!n) return "OPP";
+    const parts = n.split(/\s+/);
+    if (parts.length > 1) return parts.map((p) => p[0]).join("").slice(0, 4).toUpperCase();
+    return n.slice(0, 3).toUpperCase();
+  }
+
+  function moveRunners(bases, steps) {
+    const next = [null, null, null];
+    const scored = [];
+    for (let i = 2; i >= 0; i--) {
+      if (!bases[i]) continue;
+      const dest = i + steps;
+      if (dest >= 3) scored.push(bases[i]);
+      else next[dest] = bases[i];
+    }
+    return { bases: next, scored };
+  }
+  function forceAdvance(bases, batterId) {
+    const next = bases.slice();
+    const scored = [];
+    if (bases[0] != null) {
+      if (bases[1] != null) {
+        if (bases[2] != null) scored.push(bases[2]);
+        next[2] = bases[1];
+      }
+      next[1] = bases[0];
+    }
+    next[0] = batterId;
+    return { bases: next, scored };
+  }
+  function batterOrOpp() {
+    if (pomfretBatting()) return currentBatter().id;
+    return makeId(state).replace("id", "o");
+  }
+  function chargeCounting(opts) {
+    if (pomfretBatting()) {
+      const b = currentBatter();
+      if (opts.ab) b.ab += 1;
+      if (opts.hit) b.h += 1;
+      if (opts.extra === 2) b.doubles += 1;
+      if (opts.extra === 3) b.triples += 1;
+      if (opts.extra === 4) b.hr += 1;
+      if (opts.bb) b.bb += 1;
+      if (opts.so) b.so += 1;
+      if (opts.hbp) b.hbp += 1;
+      if (opts.sac) b.sac += 1;
+    } else {
+      const p = currentPitcher();
+      if (opts.hit) p.h += 1;
+      if (opts.bb) p.bb += 1;
+      if (opts.so) p.so += 1;
+    }
+    if (opts.hit) state.hits[battingTeam()] += 1;
+  }
+  function creditScored(ids, opts) {
+    ids.forEach((id) => {
+      const p = findPlayer(id);
+      if (p) p.r += 1;
+    });
+    if (!ids.length) return;
+    ensureInnings();
+    state.runs[battingTeam()][state.inning - 1] += ids.length;
+    if (opts.rbi && pomfretBatting()) currentBatter().rbi += ids.length;
+    if (!pomfretBatting()) {
+      const pit = currentPitcher();
+      pit.r += ids.length;
+      if (opts.earned) pit.er += ids.length;
+    }
+  }
+  function addOuts(n) {
+    const used = Math.min(n, 3 - state.outs);
+    state.outs += used;
+    if (!pomfretBatting()) currentPitcher().outs += used;
+    return state.outs >= 3;
+  }
+  function endHalf() {
+    state.bases = [null, null, null];
+    state.outs = 0;
+    state.balls = 0;
+    state.strikes = 0;
+    if (state.half === "top") state.half = "bottom";
+    else {
+      state.half = "top";
+      state.inning += 1;
+    }
+    ensureInnings();
+  }
+  function advanceBatter() {
+    if (!state.lineup.length) return;
+    state.battingIndex = (state.battingIndex + 1) % state.lineup.length;
+  }
+  function pushLog(stamp, message) {
+    state.log.unshift(stamp + " · " + message + " · " + scoreLine());
+    if (state.log.length > 200) state.log.pop();
+  }
+  function closePlay(message, ended, plateAppearance) {
+    const stamp = halfLabel();
+    const ourPlate = plateAppearance && pomfretBatting();
+    if (ourPlate) advanceBatter();
+    if (ended) endHalf();
+    else if (plateAppearance) {
+      state.balls = 0;
+      state.strikes = 0;
+    }
+    pushLog(stamp, message);
+    hideChooser();
+    persist();
+    paint();
+  }
+  function chargePitch() {
+    if (!pomfretBatting()) currentPitcher().pitches += 1;
+  }
+
+  function applyWalk(kind) {
+    const who = currentWho();
+    const moved = forceAdvance(state.bases, batterOrOpp());
+    chargeCounting(kind === "hbp" ? { hbp: true } : { bb: true });
+    state.bases = moved.bases;
+    creditScored(moved.scored, { rbi: true, earned: true });
+    closePlay(who + (kind === "hbp" ? " was hit by a pitch" : " walked"), false, true);
+  }
+  function applyStrikeout() {
+    const who = currentWho();
+    chargeCounting({ ab: true, so: true });
+    const ended = addOuts(1);
+    closePlay(who + " struck out", ended, true);
+  }
+
+  const actions = {
+    ball() {
+      snapshot();
+      chargePitch();
+      state.balls += 1;
+      if (state.balls >= 4) applyWalk("bb");
+      else { persist(); paint(); }
+    },
+    strike() {
+      snapshot();
+      chargePitch();
+      state.strikes += 1;
+      if (state.strikes >= 3) applyStrikeout();
+      else { persist(); paint(); }
+    },
+    foul() {
+      snapshot();
+      chargePitch();
+      if (state.strikes < 2) state.strikes += 1;
+      persist();
+      paint();
+    },
+    hit(btn) {
+      const n = Number(btn.dataset.n);
+      snapshot();
+      const who = currentWho();
+      const batterId = batterOrOpp();
+      const words = { 1: "singled", 2: "doubled", 3: "tripled", 4: "homered" };
+      let bases;
+      let scored;
+      if (n === 4) {
+        scored = moveRunners(state.bases, 4).scored.concat([batterId]);
+        bases = [null, null, null];
+      } else {
+        const moved = moveRunners(state.bases, n);
+        bases = moved.bases;
+        bases[n - 1] = batterId;
+        scored = moved.scored;
+      }
+      chargeCounting({ ab: true, hit: true, extra: n });
+      state.bases = bases;
+      creditScored(scored, { rbi: true, earned: true });
+      const rbiNote = scored.length ? ", " + scored.length + (scored.length === 1 ? " RBI" : " RBI") : "";
+      closePlay(who + " " + words[n] + rbiNote, false, true);
+    },
+    walk() { snapshot(); applyWalk("bb"); },
+    hbp() { snapshot(); applyWalk("hbp"); },
+    error() {
+      snapshot();
+      const who = currentWho();
+      const moved = moveRunners(state.bases, 1);
+      moved.bases[0] = batterOrOpp();
+      chargeCounting({ ab: true });
+      state.errors[fieldingTeam()] += 1;
+      state.bases = moved.bases;
+      creditScored(moved.scored, { rbi: false, earned: false });
+      closePlay(who + " reached on an error", false, true);
+    },
+    fc() {
+      snapshot();
+      const who = currentWho();
+      const forced = state.bases[0] != null;
+      if (forced) {
+        const next = state.bases.slice();
+        next[0] = batterOrOpp();
+        state.bases = next;
+      }
+      chargeCounting({ ab: true });
+      const ended = addOuts(1);
+      closePlay(who + (forced ? " reached on a fielder's choice" : " grounded out"), ended, true);
+    },
+    k() { snapshot(); applyStrikeout(); },
+    out(btn) {
+      snapshot();
+      const who = currentWho();
+      if (state.advance) {
+        const moved = moveRunners(state.bases, 1);
+        state.bases = moved.bases;
+        creditScored(moved.scored, { rbi: true, earned: true });
+      }
+      chargeCounting({ ab: true });
+      const ended = addOuts(1);
+      closePlay(who + " " + btn.dataset.kind, ended, true);
+    },
+    sac() {
+      snapshot();
+      const who = currentWho();
+      const moved = moveRunners(state.bases, 1);
+      chargeCounting({ sac: true });
+      state.bases = moved.bases;
+      creditScored(moved.scored, { rbi: true, earned: true });
+      const ended = addOuts(1);
+      closePlay(who + " sacrifice", ended, true);
+    },
+    dp() {
+      snapshot();
+      const who = currentWho();
+      const next = state.bases.slice();
+      const room = 3 - state.outs;
+      let outs = 1;
+      if (room >= 2 && next[0]) { next[0] = null; outs = 2; }
+      else if (room >= 2 && next[1]) { next[1] = null; outs = 2; }
+      else if (room >= 2 && next[2]) { next[2] = null; outs = 2; }
+      chargeCounting({ ab: true });
+      state.bases = next;
+      const ended = addOuts(outs);
+      closePlay(who + (outs === 2 ? " double play" : " grounded out"), ended, true);
+    },
+    sb() { openRunnerPlay("Steal", stealTargets(), doSteal); },
+    cs() { openRunnerPlay("Caught stealing", stealTargets(), doCaught); },
+    wp() {
+      if (!state.bases.some(Boolean)) { toast("Bases are empty"); return; }
+      snapshot();
+      const moved = moveRunners(state.bases, 1);
+      state.bases = moved.bases;
+      creditScored(moved.scored, { rbi: false, earned: true });
+      closePlay("Wild pitch", false, false);
+    },
+    eadv() {
+      if (!state.bases.some(Boolean)) { toast("Bases are empty"); return; }
+      snapshot();
+      const moved = moveRunners(state.bases, 1);
+      state.bases = moved.bases;
+      state.errors[fieldingTeam()] += 1;
+      creditScored(moved.scored, { rbi: false, earned: false });
+      closePlay("Runners advanced on an error", false, false);
+    },
+    run() {
+      snapshot();
+      if (state.bases[2]) {
+        const id = state.bases[2];
+        state.bases[2] = null;
+        creditScored([id], { rbi: false, earned: true });
+      } else {
+        creditScored(["manual"], { rbi: false, earned: true });
+      }
+      closePlay("Run scored", false, false);
+    },
+    "clear-bases"() {
+      if (!state.bases.some(Boolean)) { toast("Bases are empty"); return; }
+      snapshot();
+      state.bases = [null, null, null];
+      closePlay("Bases cleared", false, false);
+    },
+    "manual-out"() {
+      snapshot();
+      const ended = addOuts(1);
+      closePlay("Out", ended, false);
+    }
+  };
+
+  function stealTargets() {
+    const opts = [];
+    if (state.bases[0] && !state.bases[1]) opts.push({ from: 0, label: "2nd" });
+    if (state.bases[1] && !state.bases[2]) opts.push({ from: 1, label: "3rd" });
+    if (state.bases[2]) opts.push({ from: 2, label: "Home" });
+    return opts;
+  }
+  function openRunnerPlay(title, opts, fn) {
+    if (!opts.length) { toast("No runner can go"); return; }
+    if (opts.length === 1) { fn(opts[0].from); return; }
+    const box = $("chooser");
+    $("chooser-label").textContent = title;
+    const holder = $("chooser-options");
+    holder.innerHTML = "";
+    opts.forEach((o) => {
+      const b = document.createElement("button");
+      b.type = "button";
+      b.className = "btn";
+      b.textContent = o.label;
+      b.addEventListener("click", () => fn(o.from));
+      holder.appendChild(b);
+    });
+    box.hidden = false;
+  }
+  function hideChooser() { $("chooser").hidden = true; }
+  function doSteal(from) {
+    snapshot();
+    const runnerId = state.bases[from];
+    const dest = from + 1;
+    const scored = [];
+    if (dest >= 3) scored.push(runnerId);
+    else state.bases[dest] = runnerId;
+    state.bases[from] = null;
+    const p = findPlayer(runnerId);
+    if (p) p.sb += 1;
+    creditScored(scored, { rbi: false, earned: true });
+    closePlay(labelPlayer(p) + " stole " + baseWord(dest), false, false);
+  }
+  function doCaught(from) {
+    snapshot();
+    const runnerId = state.bases[from];
+    state.bases[from] = null;
+    const p = findPlayer(runnerId);
+    if (p) p.cs += 1;
+    const ended = addOuts(1);
+    const name = labelPlayer(p);
+    const stamp = halfLabel();
+    if (ended) endHalf();
+    pushLog(stamp, name + " caught stealing");
+    hideChooser();
+    persist();
+    paint();
+  }
+
+  function setIfIdle(input, value) {
+    if (document.activeElement === input) return;
+    if (input.value !== value) input.value = value;
+  }
+
+  function paint() {
+    ensureInnings();
+    if (state.battingIndex >= state.lineup.length) state.battingIndex = 0;
+    setIfIdle($("date"), state.date);
+    setIfIdle($("opponent"), state.opponent);
+    setIfIdle($("site"), state.site);
+    $("advance").checked = !!state.advance;
+    const locked = gameStarted();
+    $("side-away").disabled = locked;
+    $("side-home").disabled = locked;
+    $("side-away").classList.toggle("on", !state.pomfretHome);
+    $("side-home").classList.toggle("on", state.pomfretHome);
+    const season = loadSeason();
+    const saved = season.games.some((g) => g.id === state.gameId);
+    $("save-season").textContent = saved ? "Update season" : "Save to season";
+
+    paintBoard();
+    paintSpot();
+    paintCount();
+    paintLog();
+    syncLineup();
+    syncPitchers();
+    paintSeason(season);
+  }
+
+  function paintBoard() {
+    const inns = Math.max(9, state.inning, state.runs.pomfret.length);
+    const topTeam = state.pomfretHome ? "opp" : "pomfret";
+    let head = "<tr><th class='team'> </th>";
+    for (let i = 0; i < inns; i++) head += "<th>" + (i + 1) + "</th>";
+    head += "<th class='tot'>R</th><th class='tot'>H</th><th class='tot'>E</th></tr>";
+    const row = (team, label, cls) => {
+      let html = "<tr class='" + cls + "'><td class='team'>" + label + "</td>";
+      for (let i = 0; i < inns; i++) {
+        const started = i < state.inning - 1 || (i === state.inning - 1 && (team === topTeam || state.half === "bottom"));
+        const now = i === state.inning - 1 && started;
+        const val = started ? (state.runs[team][i] || 0) : "";
+        html += "<td class='" + (now ? "now" : "") + "' data-team='" + team + "' data-inn='" + (i + 1) + "'>" + val + "</td>";
+      }
+      html += "<td class='tot' data-score='" + team + "'>" + sum(state.runs[team]) + "</td>";
+      html += "<td class='tot' id='h-" + team + "'>" + state.hits[team] + "</td>";
+      html += "<td class='tot' id='e-" + team + "'>" + state.errors[team] + "</td></tr>";
+      return html;
+    };
+    const away = state.pomfretHome
+      ? row("opp", esc(oppAbbr()), "")
+      : row("pomfret", "POM", "pom");
+    const home = state.pomfretHome
+      ? row("pomfret", "POM", "pom")
+      : row("opp", esc(oppAbbr()), "");
+    $("linescore").innerHTML = head + away + home;
+  }
+
+  function paintSpot() {
+    const ours = pomfretBatting();
+    const b = currentBatter();
+    $("who-role").textContent = ours ? "Now batting" : "On the mound";
+    const pit = currentPitcher();
+    if (ours) {
+      $("who-name").textContent = playerLabel(b, state.battingIndex);
+      $("who-meta").textContent = halfLabel() + " · " + (b.pos || "—") + " · " + oppName();
+      const singles = b.h - b.doubles - b.triples - b.hr;
+      const tb = singles + 2 * b.doubles + 3 * b.triples + 4 * b.hr;
+      $("who-slash").innerHTML =
+        statBit(formatAvg(b.h, b.ab), "AVG") +
+        statBit(formatRate(b.h + b.bb + b.hbp, b.ab + b.bb + b.hbp + b.sac), "OBP") +
+        statBit(formatRate(tb, b.ab), "SLG");
+    } else {
+      const pname = (pit.name || "").trim() || "Pitcher";
+      const pnum = (pit.number || "").trim();
+      $("who-name").textContent = pnum ? "#" + pnum + " " + pname : pname;
+      $("who-meta").textContent = halfLabel() + " · Pomfret in the field · " + oppName() + " batting";
+      $("who-slash").innerHTML =
+        statBit(formatIP(pit.outs), "IP") +
+        statBit(String(pit.so), "SO") +
+        statBit(formatERA(pit), "ERA");
+    }
+    paintField(ours, b, pit);
+    const due = ours ? "" : "<div class='who-meta'>Due up " + playerLabel(b, state.battingIndex) + "</div>";
+    $("mound").innerHTML = ours
+      ? "<div class='who-meta'>Pitching " + (((pit.name || "").trim() || "Pitcher")) + " · " + formatIP(pit.outs) + " IP</div>"
+      : due;
+  }
+  function shortName(p) {
+    const name = (p.name || "").trim();
+    if (!name) return "";
+    const parts = name.split(/\s+/);
+    return parts[parts.length - 1];
+  }
+  function paintSlot(el, opts) {
+    const numEl = el.querySelector(".mark-num");
+    const nameEl = el.querySelector(".slot-name");
+    if (numEl) numEl.textContent = opts.num;
+    if (nameEl && opts.name != null) nameEl.textContent = opts.name;
+    el.classList.toggle("filled", !!opts.filled);
+    el.classList.toggle("on", !!opts.on);
+    el.classList.toggle("at-bat", !!opts.atBat);
+    el.classList.toggle("is-up", !!opts.up);
+    el.title = opts.title || "";
+  }
+  function paintField(ours, batter, pit) {
+    ["CF", "LF", "RF", "SS", "2B", "3B", "1B", "P", "C"].forEach((pos) => {
+      const el = $("pos-" + pos);
+      let person = state.lineup.find((p) => p.pos === pos) || null;
+      if (pos === "P" && ((pit.name || "").trim() || (pit.number || "").trim())) {
+        person = pit;
+      }
+      const named = person && ((person.name || "").trim() || (person.number || "").trim());
+      const num = named ? ((person.number || "").trim() || shortName(person).slice(0, 2)) : pos;
+      paintSlot(el, {
+        num: num,
+        name: named ? (shortName(person) || pos) : "",
+        filled: !!named,
+        up: !!(ours && batter && batter.pos === pos),
+        title: named
+          ? pos + " · " + ((person.number ? "#" + person.number + " " : "") + ((person.name || "").trim() || pos))
+          : pos
+      });
+    });
+    const bag = { 1: "1st", 2: "2nd", 3: "3rd" };
+    [1, 2, 3].forEach((n) => {
+      const el = $("base-" + n);
+      const id = state.bases[n - 1];
+      const runner = id ? findPlayer(id) : null;
+      if (runner) {
+        const idx = state.lineup.indexOf(runner);
+        paintSlot(el, {
+          num: (runner.number || "").trim() || "•",
+          name: shortName(runner) || playerLabel(runner, idx < 0 ? 0 : idx),
+          on: true,
+          title: "On " + bag[n] + ": " + playerLabel(runner, idx < 0 ? 0 : idx)
+        });
+      } else if (id) {
+        paintSlot(el, { num: "R", name: "Runner", on: true, title: "Runner on " + bag[n] });
+      } else {
+        paintSlot(el, { num: "", name: bag[n], on: false, title: bag[n] + " base" });
+      }
+    });
+    const ab = $("pos-AB");
+    if (ours && batter) {
+      paintSlot(ab, {
+        num: (batter.number || "").trim() || String(state.battingIndex + 1),
+        name: shortName(batter) || batter.pos || "At bat",
+        filled: true,
+        atBat: true,
+        title: "At bat: " + playerLabel(batter, state.battingIndex)
+      });
+    } else {
+      paintSlot(ab, { num: "AB", name: "Opponent", filled: false, atBat: false, title: "Opponent at bat" });
+    }
+  }
+  function statBit(value, label) {
+    return "<div><b>" + value + "</b><span>" + label + "</span></div>";
+  }
+  function paintCount() {
+    $("ball-num").textContent = state.balls;
+    $("strike-num").textContent = state.strikes;
+    $("out-num").textContent = state.outs;
+    paintPips("ball-pips", 4, state.balls);
+    paintPips("strike-pips", 3, state.strikes);
+    paintPips("out-pips", 3, state.outs);
+  }
+  function paintPips(id, total, on) {
+    const el = $(id);
+    el.innerHTML = "";
+    for (let i = 0; i < total; i++) {
+      const pip = document.createElement("i");
+      pip.className = "pip" + (i < on ? " on" : "");
+      el.appendChild(pip);
+    }
+  }
+  function paintLog() {
+    const list = $("log");
+    $("last-text").textContent = state.log[0] || "No pitches yet.";
+    list.innerHTML = "";
+    if (!state.log.length) {
+      const li = document.createElement("li");
+      li.className = "empty";
+      li.textContent = "Plays show up here, newest first.";
+      list.appendChild(li);
+      return;
+    }
+    state.log.slice(0, 40).forEach((line) => {
+      const li = document.createElement("li");
+      li.textContent = line;
+      list.appendChild(li);
+    });
+  }
+
+  function syncLineup() {
+    const body = $("lineup-body");
+    const rows = [...body.querySelectorAll("tr")];
+    const same = rows.length === state.lineup.length && rows.every((tr, i) => tr.dataset.id === state.lineup[i].id);
+    if (!same) buildLineup();
+    else updateLineupStats();
+    const all = state.lineup.concat(state.played);
+    const tot = all.reduce((a, p) => {
+      ["ab", "r", "h", "doubles", "triples", "hr", "rbi", "bb", "so"].forEach((k) => { a[k] += p[k]; });
+      return a;
+    }, { ab: 0, r: 0, h: 0, doubles: 0, triples: 0, hr: 0, rbi: 0, bb: 0, so: 0 });
+    $("lineup-foot").innerHTML = "<tr><td></td><td></td><td class='who'>Team</td><td></td><td>" +
+      [tot.ab, tot.r, tot.h, tot.doubles, tot.triples, tot.hr, tot.rbi, tot.bb, tot.so, formatAvg(tot.h, tot.ab)].join("</td><td>") +
+      "</td></tr>";
+    const played = $("played");
+    if (!state.played.length) { played.textContent = ""; return; }
+    played.textContent = "Left the game: " + state.played.map((p) => {
+      const i = 0;
+      return playerLabel(p, i).replace("Batter 1", (p.name || "Sub")) + " " + p.h + "-" + p.ab;
+    }).join(" · ");
+  }
+  function buildLineup() {
+    const body = $("lineup-body");
+    body.innerHTML = "";
+    state.lineup.forEach((player, index) => {
+      const tr = document.createElement("tr");
+      tr.dataset.id = player.id;
+      tr.appendChild(orderCell(index));
+      tr.appendChild(numCell(player));
+      tr.appendChild(nameCell(player, "Name"));
+      tr.appendChild(posCell(player));
+      ["ab", "r", "h", "doubles", "triples", "hr", "rbi", "bb", "so"].forEach((key) => {
+        const td = document.createElement("td");
+        td.dataset.stat = key;
+        td.textContent = player[key];
+        tr.appendChild(td);
+      });
+      const avg = document.createElement("td");
+      avg.dataset.stat = "avg";
+      avg.textContent = formatAvg(player.h, player.ab);
+      tr.appendChild(avg);
+      body.appendChild(tr);
+    });
+    updateLineupStats();
+  }
+  function orderCell(index) {
+    const td = document.createElement("td");
+    td.className = "ord";
+    const wrap = document.createElement("div");
+    wrap.className = "rowbtns";
+    const label = document.createElement("b");
+    label.textContent = String(index + 1);
+    label.style.width = "1.1em";
+    const up = mini("↑", () => moveLineup(index, -1));
+    const down = mini("↓", () => moveLineup(index, 1));
+    const sub = mini("Sub", () => subBatter(index));
+    wrap.append(label, up, down, sub);
+    td.appendChild(wrap);
+    return td;
+  }
+  function mini(text, fn) {
+    const b = document.createElement("button");
+    b.type = "button";
+    b.className = "mini";
+    b.textContent = text;
+    b.addEventListener("click", fn);
+    return b;
+  }
+  function numCell(player) {
+    const td = document.createElement("td");
+    const input = document.createElement("input");
+    input.className = "num";
+    input.maxLength = 3;
+    input.inputMode = "numeric";
+    input.value = player.number;
+    input.autocomplete = "off";
+    input.addEventListener("input", () => { player.number = input.value; persist(); paint(); });
+    td.appendChild(input);
+    return td;
+  }
+  function nameCell(player, placeholder) {
+    const td = document.createElement("td");
+    td.className = "who";
+    const input = document.createElement("input");
+    input.type = "text";
+    input.placeholder = placeholder;
+    input.maxLength = 24;
+    input.value = player.name;
+    input.autocomplete = "off";
+    input.spellcheck = false;
+    input.addEventListener("input", () => { player.name = input.value; persist(); paint(); });
+    td.appendChild(input);
+    return td;
+  }
+  function posCell(player) {
+    const td = document.createElement("td");
+    const select = document.createElement("select");
+    const blank = document.createElement("option");
+    blank.value = "";
+    blank.textContent = "—";
+    select.appendChild(blank);
+    POSITIONS.forEach((pos) => {
+      const opt = document.createElement("option");
+      opt.value = pos;
+      opt.textContent = pos;
+      select.appendChild(opt);
+    });
+    select.value = player.pos || "";
+    select.addEventListener("change", () => { player.pos = select.value; persist(); });
+    td.appendChild(select);
+    return td;
+  }
+  function updateLineupStats() {
+    [...$("lineup-body").querySelectorAll("tr")].forEach((tr, index) => {
+      const player = state.lineup[index];
+      const ours = pomfretBatting();
+      tr.classList.toggle("active", ours && index === state.battingIndex);
+      tr.classList.toggle("due", !ours && index === state.battingIndex);
+      tr.querySelectorAll("[data-stat]").forEach((cell) => {
+        const key = cell.dataset.stat;
+        cell.textContent = key === "avg" ? formatAvg(player.h, player.ab) : player[key];
+      });
+    });
+  }
+  function moveLineup(index, dir) {
+    const j = index + dir;
+    if (j < 0 || j >= state.lineup.length) return;
+    snapshot();
+    const [row] = state.lineup.splice(index, 1);
+    state.lineup.splice(j, 0, row);
+    if (state.battingIndex === index) state.battingIndex = j;
+    else if (state.battingIndex === j) state.battingIndex = index;
+    persist();
+    paint();
+  }
+  function subBatter(index) {
+    snapshot();
+    const old = state.lineup[index];
+    state.played.push(old);
+    const neu = blankBatter(state, old.pos);
+    state.lineup.splice(index, 1, neu);
+    persist();
+    paint();
+    toast("Sub in for " + (old.name || "that spot"));
+  }
+
+  function syncPitchers() {
+    const body = $("pitch-body");
+    const rows = [...body.querySelectorAll("tr")];
+    const same = rows.length === state.pitchers.length && rows.every((tr, i) => tr.dataset.id === state.pitchers[i].id);
+    if (!same) buildPitchers();
+    else {
+      rows.forEach((tr, index) => {
+        const p = state.pitchers[index];
+        tr.classList.toggle("active", !!p.current);
+        tr.querySelector("[data-stat='ip']").textContent = formatIP(p.outs);
+        ["h", "r", "er", "bb", "so", "pitches"].forEach((key) => {
+          tr.querySelector("[data-stat='" + key + "']").textContent = p[key];
+        });
+        tr.querySelector("[data-stat='era']").textContent = formatERA(p);
+        const use = tr.querySelector("button.mini");
+        if (use) use.textContent = p.current ? "In" : "Use";
+      });
+    }
+  }
+  function buildPitchers() {
+    const body = $("pitch-body");
+    body.innerHTML = "";
+    state.pitchers.forEach((p) => {
+      const tr = document.createElement("tr");
+      tr.dataset.id = p.id;
+      tr.classList.toggle("active", !!p.current);
+      tr.appendChild(pitchNum(p));
+      tr.appendChild(nameCell(p, "Pitcher"));
+      const ip = document.createElement("td");
+      ip.dataset.stat = "ip";
+      ip.textContent = formatIP(p.outs);
+      tr.appendChild(ip);
+      ["h", "r", "er", "bb", "so", "pitches"].forEach((key) => {
+        const td = document.createElement("td");
+        td.dataset.stat = key;
+        td.textContent = p[key];
+        tr.appendChild(td);
+      });
+      const era = document.createElement("td");
+      era.dataset.stat = "era";
+      era.textContent = formatERA(p);
+      tr.appendChild(era);
+      const use = document.createElement("td");
+      const b = mini(p.current ? "In" : "Use", () => setPitcher(p.id));
+      use.appendChild(b);
+      tr.appendChild(use);
+      body.appendChild(tr);
+    });
+  }
+  function pitchNum(p) {
+    const td = document.createElement("td");
+    const input = document.createElement("input");
+    input.className = "num";
+    input.maxLength = 3;
+    input.value = p.number;
+    input.addEventListener("input", () => { p.number = input.value; persist(); paint(); });
+    td.appendChild(input);
+    return td;
+  }
+  function setPitcher(id) {
+    snapshot();
+    state.pitchers.forEach((p) => { p.current = p.id === id; });
+    persist();
+    paint();
+  }
+
+  function paintSeason(season) {
+    const games = season.games;
+    $("season-blurb").hidden = games.length > 0;
+    $("season-bat-wrap").hidden = games.length === 0;
+    $("season-pit-wrap").hidden = games.length === 0;
+    const list = $("season-games");
+    list.innerHTML = "";
+    if (!games.length) return;
+    const batters = new Map();
+    const pitchers = new Map();
+    games.forEach((g) => {
+      g.batters.forEach((b) => addTot(batters, keyOf(b), b, ["ab", "r", "h", "doubles", "triples", "hr", "rbi", "bb", "so", "hbp", "sac", "sb"]));
+      g.pitchers.forEach((p) => addTot(pitchers, keyOf(p), p, ["outs", "h", "r", "er", "bb", "so", "pitches"]));
+    });
+    $("season-bat").innerHTML = seasonTable("Batting", [...batters.values()], ["G", "AB", "R", "H", "2B", "3B", "HR", "RBI", "BB", "SO", "AVG"], (p) =>
+      [p.g, p.ab, p.r, p.h, p.doubles, p.triples, p.hr, p.rbi, p.bb, p.so, formatAvg(p.h, p.ab)]);
+    $("season-pit").innerHTML = seasonTable("Pitching", [...pitchers.values()], ["G", "IP", "H", "R", "ER", "BB", "SO", "ERA"], (p) =>
+      [p.g, formatIP(p.outs), p.h, p.r, p.er, p.bb, p.so, formatERA(p)]);
+    games.slice().reverse().forEach((g) => {
+      const li = document.createElement("li");
+      const letter = g.rP > g.rO ? "W" : g.rP < g.rO ? "L" : "T";
+      const span = document.createElement("span");
+      span.innerHTML = "<b class='wl'>" + letter + "</b> " + esc(g.date) + " vs " + esc(g.opponent) + " · POM " + g.rP + "–" + g.rO;
+      const rm = mini("Remove", () => {
+        if (!confirm("Remove this game from the season?")) return;
+        const next = loadSeason();
+        next.games = next.games.filter((x) => x.id !== g.id);
+        saveSeason(next);
+        paint();
+      });
+      li.append(span, rm);
+      list.appendChild(li);
+    });
+  }
+  function keyOf(p) {
+    const name = (p.name || "").trim().toLowerCase();
+    const num = (p.number || "").trim();
+    if (!name && !num) return "id:" + (p.id || "");
+    return num + "|" + name;
+  }
+  function addTot(map, key, src, fields) {
+    if (!map.has(key)) {
+      const base = { name: src.name || "Unnamed", number: src.number || "", g: 0 };
+      fields.forEach((f) => { base[f] = 0; });
+      map.set(key, base);
+    }
+    const row = map.get(key);
+    row.g += 1;
+    if (src.name) row.name = src.name;
+    fields.forEach((f) => { row[f] += src[f] || 0; });
+  }
+  function seasonTable(title, rows, headers, cells) {
+    rows.sort((a, b) => (b.ab || b.outs || 0) - (a.ab || a.outs || 0));
+    let html = "<thead><tr><th class='who'>" + title + "</th><th>#</th>";
+    headers.forEach((h) => { html += "<th>" + h + "</th>"; });
+    html += "</tr></thead><tbody>";
+    rows.forEach((r) => {
+      html += "<tr><td class='who'>" + esc(r.name || "Unnamed") + "</td><td>" + esc(r.number || "") + "</td>";
+      cells(r).forEach((c) => { html += "<td>" + c + "</td>"; });
+      html += "</tr>";
+    });
+    return html + "</tbody>";
+  }
+  function esc(s) {
+    return String(s).replace(/[&<>"']/g, (c) => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" }[c]));
+  }
+
+  function gameSnapshot() {
+    const slimB = (b) => ({
+      id: b.id, name: b.name, number: b.number, pos: b.pos,
+      ab: b.ab, r: b.r, h: b.h, doubles: b.doubles, triples: b.triples, hr: b.hr,
+      rbi: b.rbi, bb: b.bb, so: b.so, hbp: b.hbp, sac: b.sac, sb: b.sb
+    });
+    return {
+      id: state.gameId,
+      date: state.date,
+      opponent: oppName(),
+      site: state.site,
+      rP: sum(state.runs.pomfret),
+      rO: sum(state.runs.opp),
+      batters: state.lineup.concat(state.played).filter((b) => b.name || b.ab || b.bb || b.hbp || b.r || b.h || b.sac).map(slimB),
+      pitchers: state.pitchers.filter((p) => p.name || p.outs || p.h || p.bb || p.so || p.r).map((p) => ({
+        id: p.id, name: p.name, number: p.number, outs: p.outs, h: p.h, r: p.r, er: p.er, bb: p.bb, so: p.so, pitches: p.pitches
+      }))
+    };
+  }
+  function saveThisGame() {
+    const season = loadSeason();
+    const snap = gameSnapshot();
+    const idx = season.games.findIndex((g) => g.id === snap.id);
+    if (idx >= 0) season.games[idx] = snap;
+    else season.games.push(snap);
+    saveSeason(season);
+    paint();
+    toast(idx >= 0 ? "Season updated" : "Game saved to season");
+  }
+
+  function pad(text, n) {
+    text = String(text);
+    return text + " ".repeat(Math.max(0, n - text.length));
+  }
+  function buildSummary() {
+    const lines = [];
+    lines.push("POMFRET GRIFFINS");
+    lines.push(state.date + " vs " + oppName() + (state.site ? " at " + state.site : "") + " · Pomfret " + (state.pomfretHome ? "home" : "away"));
+    lines.push("Score  POM " + sum(state.runs.pomfret) + "  " + oppAbbr() + " " + sum(state.runs.opp));
+    lines.push("Hits   POM " + state.hits.pomfret + "  " + oppAbbr() + " " + state.hits.opp + "    Errors  POM " + state.errors.pomfret + "  " + oppAbbr() + " " + state.errors.opp);
+    lines.push("");
+    lines.push("BATTING");
+    lines.push(pad("Player", 22) + "AB  R  H  2B 3B HR RBI BB SO AVG");
+    state.lineup.concat(state.played).forEach((p, i) => {
+      const name = playerLabel(p, state.lineup.indexOf(p) === -1 ? i : state.lineup.indexOf(p));
+      lines.push(
+        pad(name.slice(0, 21), 22) +
+        [p.ab, p.r, p.h, p.doubles, p.triples, p.hr, p.rbi, p.bb, p.so].map((n) => pad(n, 3)).join(" ") +
+        formatAvg(p.h, p.ab)
+      );
+    });
+    lines.push("");
+    lines.push("PITCHING");
+    lines.push(pad("Pitcher", 22) + "IP    H  R  ER BB SO PC  ERA");
+    state.pitchers.forEach((p) => {
+      const name = ((p.number ? "#" + p.number + " " : "") + ((p.name || "").trim() || "Pitcher"));
+      lines.push(pad(name.slice(0, 21), 22) + pad(formatIP(p.outs), 6) + [p.h, p.r, p.er, p.bb, p.so, p.pitches].map((n) => pad(n, 3)).join(" ") + formatERA(p));
+    });
+    if (state.log.length) {
+      lines.push("");
+      lines.push("PLAYS");
+      state.log.slice().reverse().forEach((line) => lines.push(line));
+    }
+    return lines.join("\n");
+  }
+  async function copyBook() {
+    const text = buildSummary();
+    try {
+      await navigator.clipboard.writeText(text);
+      toast("Box score copied");
+    } catch (e) {
+      const area = document.createElement("textarea");
+      area.value = text;
+      document.body.appendChild(area);
+      area.select();
+      document.execCommand("copy");
+      area.remove();
+      toast("Box score copied");
+    }
+  }
+
+  function newGame() {
+    if (!confirm("Start a new game? The lineup names stay. This game's plays are cleared.")) return;
+    const roster = state.lineup.map((p) => ({ name: p.name, number: p.number, pos: p.pos }));
+    const arms = state.pitchers.map((p) => ({ name: p.name, number: p.number }));
+    const meta = { opponent: state.opponent, site: state.site, pomfretHome: state.pomfretHome };
+    state = defaultState();
+    roster.forEach((r, i) => {
+      if (!state.lineup[i]) state.lineup[i] = blankBatter(state, r.pos);
+      state.lineup[i].name = r.name;
+      state.lineup[i].number = r.number;
+      state.lineup[i].pos = r.pos;
+    });
+    if (arms[0]) {
+      state.pitchers[0].name = arms[0].name;
+      state.pitchers[0].number = arms[0].number;
+    }
+    state.opponent = meta.opponent;
+    state.site = meta.site;
+    state.pomfretHome = meta.pomfretHome;
+    undoStack.length = 0;
+    persist();
+    paint();
+    toast("New game");
+  }
+  function undo() {
+    if (!undoStack.length) { toast("Nothing to undo"); return; }
+    const current = state;
+    const prev = JSON.parse(undoStack.pop());
+    const sameIds = prev.lineup.length === current.lineup.length && prev.lineup.every((p, i) => p.id === current.lineup[i].id);
+    if (sameIds) {
+      prev.lineup.forEach((p, i) => {
+        p.name = current.lineup[i].name;
+        p.number = current.lineup[i].number;
+        p.pos = current.lineup[i].pos;
+      });
+      const sameP = prev.pitchers.length === current.pitchers.length && prev.pitchers.every((p, i) => p.id === current.pitchers[i].id);
+      if (sameP) {
+        prev.pitchers.forEach((p, i) => {
+          p.name = current.pitchers[i].name;
+          p.number = current.pitchers[i].number;
+        });
+      }
+      prev.opponent = current.opponent;
+      prev.site = current.site;
+      prev.date = current.date;
+    }
+    state = prev;
+    persist();
+    paint();
+  }
+
+  function downloadBackup() {
+    const blob = new Blob([JSON.stringify({ game: state, season: loadSeason() }, null, 2)], { type: "application/json" });
+    const a = document.createElement("a");
+    a.href = URL.createObjectURL(blob);
+    a.download = "pomfret-griffins-scorebook.json";
+    a.click();
+    URL.revokeObjectURL(a.href);
+  }
+  function restoreBackup(file) {
+    const reader = new FileReader();
+    reader.onload = () => {
+      try {
+        const data = JSON.parse(reader.result);
+        if (!data || !data.game || !Array.isArray(data.game.lineup)) throw new Error("bad");
+        if (!confirm("Replace the open game and season with this backup?")) return;
+        state = data.game;
+        if (data.season && Array.isArray(data.season.games)) saveSeason(data.season);
+        undoStack.length = 0;
+        persist();
+        paint();
+        toast("Backup restored");
+      } catch (e) {
+        toast("That file is not a Griffins backup");
+      }
+    };
+    reader.readAsText(file);
+  }
+
+  document.body.addEventListener("click", (e) => {
+    const btn = e.target.closest("[data-act]");
+    if (!btn) return;
+    const fn = actions[btn.dataset.act];
+    if (fn) fn(btn);
+  });
+  $("date").addEventListener("input", () => { state.date = $("date").value; persist(); });
+  $("opponent").addEventListener("input", () => { state.opponent = $("opponent").value; persist(); paint(); });
+  $("site").addEventListener("input", () => { state.site = $("site").value; persist(); });
+  $("advance").addEventListener("change", () => { state.advance = $("advance").checked; persist(); });
+  $("side-away").addEventListener("click", () => { if (gameStarted()) return; state.pomfretHome = false; persist(); paint(); });
+  $("side-home").addEventListener("click", () => { if (gameStarted()) return; state.pomfretHome = true; persist(); paint(); });
+  $("new-game").addEventListener("click", newGame);
+  $("undo").addEventListener("click", undo);
+  $("copy").addEventListener("click", copyBook);
+  $("save-season").addEventListener("click", saveThisGame);
+  $("backup").addEventListener("click", downloadBackup);
+  $("restore").addEventListener("click", () => $("restore-file").click());
+  $("restore-file").addEventListener("change", () => {
+    const file = $("restore-file").files && $("restore-file").files[0];
+    $("restore-file").value = "";
+    if (file) restoreBackup(file);
+  });
+  $("add-batter").addEventListener("click", () => {
+    if (state.lineup.length >= 15) { toast("Lineup is full"); return; }
+    snapshot();
+    state.lineup.push(blankBatter(state, "EH"));
+    persist();
+    paint();
+  });
+  $("add-pitcher").addEventListener("click", () => {
+    snapshot();
+    state.pitchers.forEach((p) => { p.current = false; });
+    state.pitchers.push(blankPitcher(state));
+    persist();
+    paint();
+  });
+
+  document.addEventListener("keydown", (e) => {
+    const tag = (e.target.tagName || "").toLowerCase();
+    if (tag === "input" || tag === "textarea" || tag === "select") return;
+    if (e.metaKey || e.ctrlKey || e.altKey) return;
+    const key = e.key.toLowerCase();
+    const map = { b: "ball", s: "strike", f: "foul", k: "k", w: "walk", u: "undo" };
+    if (map[key]) {
+      e.preventDefault();
+      if (key === "u") undo();
+      else actions[map[key]]();
+      return;
+    }
+    if (["1", "2", "3", "4"].includes(e.key)) {
+      e.preventDefault();
+      actions.hit({ dataset: { n: e.key } });
+    }
+  });
+
+  state = loadGame();
+  paint();
+})();
+</script>
+</body>
+</html>
