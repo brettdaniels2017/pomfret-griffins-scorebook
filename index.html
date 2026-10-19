@@ -74,6 +74,25 @@
     color: rgba(244, 238, 228, 0.78);
   }
   .lede-wrap { background: var(--black); color: var(--cream); border-top: 1px solid rgba(244, 238, 228, 0.12); }
+  .tabs {
+    width: min(1120px, calc(100% - 28px));
+    margin: 0 auto;
+    display: flex;
+    gap: 8px;
+    padding: 2px 0 16px;
+  }
+  .tab {
+    background: transparent;
+    color: rgba(244, 238, 228, 0.72);
+    border: 1px solid rgba(244, 238, 228, 0.28);
+    min-height: 42px;
+    padding: 8px 18px;
+    font-weight: 800;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+  }
+  .tab.on { background: var(--red); color: white; border-color: var(--red); }
+  .view[hidden] { display: none; }
   .lede {
     width: min(1120px, calc(100% - 28px));
     margin: 0 auto;
@@ -327,10 +346,19 @@
   .group { margin-bottom: 10px; }
   .group p { font-size: 11px; font-weight: 800; letter-spacing: 0.14em; text-transform: uppercase; margin-bottom: 6px; color: var(--muted); }
   .pad { display: grid; gap: 8px; }
-  .g4 { grid-template-columns: repeat(4, 1fr); }
   .g3 { grid-template-columns: repeat(3, 1fr); }
-  .g2 { grid-template-columns: repeat(2, 1fr); }
   .pad button { min-height: 48px; }
+  .play-pick { display: flex; flex-direction: column; gap: 4px; margin: 2px 0 12px; }
+  .play-pick span { font-size: 11px; font-weight: 800; letter-spacing: 0.14em; text-transform: uppercase; color: var(--muted); }
+  .play-pick select {
+    min-height: 48px;
+    appearance: none;
+    background: #fff url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 12 8'%3E%3Cpath fill='%23120d0c' d='M1 1l5 5 5-5'/%3E%3C/svg%3E") no-repeat right 14px center / 12px 8px;
+    padding-right: 36px;
+    font-weight: 800;
+    letter-spacing: 0.04em;
+    text-transform: uppercase;
+  }
   .switch {
     display: flex;
     align-items: center;
@@ -367,26 +395,31 @@
   .stats tr.active { background: #f8e4e6; }
   .stats tr.due { box-shadow: inset 3px 0 0 var(--red); }
   .stats tfoot td { font-weight: 800; border-top: 2px solid var(--black); border-bottom: 0; }
+  .ord-line { display: flex; align-items: center; gap: 4px; }
   .rowbtns { display: flex; gap: 2px; }
   .mini { min-height: 28px; padding: 2px 6px; font-size: 12px; letter-spacing: 0; }
 
   .played { margin-top: 8px; color: var(--muted); font-size: 14px; }
-  .games { list-style: none; padding: 0; margin: 8px 0 0; }
-  .games li { display: flex; justify-content: space-between; gap: 8px; align-items: center; border-bottom: 1px solid var(--line); padding: 6px 0; }
-  .wl { font-weight: 800; color: var(--red-deep); width: 1.2em; }
-
-  .legend { display: grid; grid-template-columns: 1.1fr 0.9fr; gap: 18px; }
-  .legend h3 { font-size: 16px; letter-spacing: 0.08em; text-transform: uppercase; margin-bottom: 6px; }
-  .legend ul { margin: 0; padding-left: 18px; }
-  .legend li { margin: 4px 0; }
-  footer.note { color: var(--muted); font-size: 14px; margin-top: 8px; }
-  kbd {
-    border: 1px solid var(--black);
-    padding: 0 4px;
-    font-family: inherit;
-    font-weight: 800;
-    background: #fff;
+  .wl { font-weight: 800; color: var(--red-deep); }
+  .sched-form {
+    display: grid;
+    grid-template-columns: 150px 120px 1fr 1fr 120px auto;
+    gap: 10px;
+    align-items: end;
+    margin-bottom: 14px;
   }
+  .slate { min-width: 760px; }
+  .slate th, .slate td { text-align: left; }
+  .slate td.act { text-align: right; }
+  .slate .muted { color: var(--muted); font-weight: 700; }
+  .record { font-weight: 800; letter-spacing: 0.06em; margin: 0 0 10px; }
+
+  footer.note { color: var(--muted); font-size: 14px; margin-top: 8px; }
+  .roster-table { min-width: 520px; }
+  .roster-table td.name { text-align: left; }
+  .roster-table td.name input { width: 14rem; }
+  .sub-pick { min-width: 8.5rem; }
+  .pad button:disabled, #play-menu:disabled { opacity: 0.45; cursor: not-allowed; }
 
   #toast {
     position: fixed;
@@ -403,18 +436,17 @@
   #toast[hidden] { display: none; }
 
   @media (max-width: 900px) {
-    .meta, .layout, .legend, .park-layout { grid-template-columns: 1fr; }
-    .g4 { grid-template-columns: repeat(2, 1fr); }
+    .meta, .layout, .park-layout, .sched-form { grid-template-columns: 1fr 1fr; }
   }
   @media (max-width: 560px) {
     .top-inner { gap: 12px; }
     .crest { width: 62px; height: 62px; }
-    .g3 { grid-template-columns: 1fr 1fr; }
     .count { gap: 6px; }
     .lamp strong { font-size: 28px; }
   }
   @media print {
-    .band, .toolbar, .pad, .group, .switch, #chooser, .rowbtns, #toast, .lede-wrap { display: none !important; }
+    .band, .toolbar, .pad, .group, .play-pick, .switch, #chooser, .rowbtns, #toast, .lede-wrap, .tabs, .sched-form { display: none !important; }
+    .view, .view[hidden] { display: block !important; }
     body { background: white; }
     .panel { box-shadow: none; }
     header.top { color: black; background: white; }
@@ -452,9 +484,15 @@
   </header>
   <div class="lede-wrap">
     <p class="lede">Take the count, tap the play, and the line score, batting line, and pitching line update with the inning. Everything stays in this browser.</p>
+    <nav class="tabs" role="tablist" aria-label="Scorebook">
+      <button type="button" class="tab on" id="tab-play" role="tab" aria-selected="true" aria-controls="view-play">Play</button>
+      <button type="button" class="tab" id="tab-roster" role="tab" aria-selected="false" aria-controls="view-roster">Roster</button>
+      <button type="button" class="tab" id="tab-book" role="tab" aria-selected="false" aria-controls="view-book">Schedule</button>
+    </nav>
   </div>
 
   <main>
+    <div id="view-play" class="view">
     <section class="panel" aria-label="Game setup">
       <div class="kicker">This game</div>
       <div class="meta">
@@ -475,6 +513,7 @@
         </div>
       </div>
       <div class="toolbar">
+        <button type="button" class="btn danger" id="start-game">Start game</button>
         <button type="button" class="btn" id="new-game">New game</button>
         <button type="button" class="btn" id="undo">Undo</button>
         <button type="button" class="btn primary" id="copy">Copy book</button>
@@ -568,6 +607,8 @@
     <div class="layout">
       <section class="panel" aria-label="Live play">
         <div class="kicker">Live play</div>
+        <p class="empty" id="pregame">Set the lineup and pitcher, then start the game.</p>
+        <p class="empty" id="final-note" hidden>Final</p>
         <div class="count" aria-label="Count">
           <div class="lamp"><strong id="ball-num">0</strong><em>Balls</em><div class="pips" id="ball-pips"></div></div>
           <div class="lamp"><strong id="strike-num">0</strong><em>Strikes</em><div class="pips" id="strike-pips"></div></div>
@@ -583,54 +624,46 @@
             <button type="button" data-act="foul">Foul</button>
           </div>
         </div>
-        <div class="group">
-          <p>Hits</p>
-          <div class="pad g4">
-            <button type="button" class="hit" data-act="hit" data-n="1">Single</button>
-            <button type="button" class="hit" data-act="hit" data-n="2">Double</button>
-            <button type="button" class="hit" data-act="hit" data-n="3">Triple</button>
-            <button type="button" class="hr" data-act="hit" data-n="4">Home run</button>
-          </div>
-        </div>
-        <div class="group">
-          <p>On base</p>
-          <div class="pad g4">
-            <button type="button" data-act="walk">Walk</button>
-            <button type="button" data-act="hbp">Hit by pitch</button>
-            <button type="button" data-act="error">On error</button>
-            <button type="button" data-act="fc">Fielder's choice</button>
-          </div>
-        </div>
-        <div class="group">
-          <p>Outs</p>
-          <div class="pad g4">
-            <button type="button" data-act="k">Strikeout</button>
-            <button type="button" data-act="out" data-kind="grounded out">Groundout</button>
-            <button type="button" data-act="out" data-kind="flew out">Flyout</button>
-            <button type="button" data-act="out" data-kind="lined out">Lineout</button>
-            <button type="button" data-act="out" data-kind="popped out">Popup</button>
-            <button type="button" data-act="sac">Sacrifice</button>
-            <button type="button" data-act="dp">Double play</button>
-            <button type="button" data-act="manual-out">Manual out</button>
-          </div>
-        </div>
-        <div class="group">
-          <p>Runners</p>
-          <div class="pad g4">
-            <button type="button" data-act="sb">Stolen base</button>
-            <button type="button" data-act="cs">Caught stealing</button>
-            <button type="button" data-act="wp">Wild pitch</button>
-            <button type="button" data-act="eadv">Error, advance</button>
-          </div>
-        </div>
+        <label class="play-pick">
+          <span>Play</span>
+          <select id="play-menu" aria-label="Play">
+            <option value="">Choose a play</option>
+            <optgroup label="Hits">
+              <option value="hit" data-n="1">Single</option>
+              <option value="hit" data-n="2">Double</option>
+              <option value="hit" data-n="3">Triple</option>
+              <option value="hit" data-n="4">Home run</option>
+            </optgroup>
+            <optgroup label="On base">
+              <option value="walk">Walk</option>
+              <option value="hbp">Hit by pitch</option>
+              <option value="error">On error</option>
+              <option value="fc">Fielder's choice</option>
+            </optgroup>
+            <optgroup label="Outs">
+              <option value="k">Strikeout</option>
+              <option value="out" data-kind="grounded out">Groundout</option>
+              <option value="out" data-kind="flew out">Flyout</option>
+              <option value="out" data-kind="lined out">Lineout</option>
+              <option value="out" data-kind="popped out">Popup</option>
+              <option value="sac">Sacrifice</option>
+              <option value="dp">Double play</option>
+              <option value="manual-out">Manual out</option>
+            </optgroup>
+            <optgroup label="Runners">
+              <option value="sb">Stolen base</option>
+              <option value="cs">Caught stealing</option>
+              <option value="wp">Wild pitch</option>
+              <option value="eadv">Error, advance</option>
+              <option value="run">Score a run</option>
+              <option value="clear-bases">Clear bases</option>
+            </optgroup>
+          </select>
+        </label>
         <label class="switch"><input type="checkbox" id="advance"> Advance runners on outs</label>
         <div id="chooser" hidden>
           <strong id="chooser-label"></strong>
           <span id="chooser-options"></span>
-        </div>
-        <div class="toolbar">
-          <button type="button" class="btn ghost" data-act="run">Score a run</button>
-          <button type="button" class="btn ghost" data-act="clear-bases">Clear bases</button>
         </div>
 
         <div class="kicker" style="margin-top:16px">Play log</div>
@@ -639,7 +672,7 @@
 
       <div>
         <section class="panel" aria-label="Batting">
-          <div class="kicker">Pomfret batting</div>
+          <div class="kicker" id="bat-kicker">Pomfret batting</div>
           <div class="book-scroll">
             <table class="stats" id="lineup">
               <thead>
@@ -647,8 +680,9 @@
                   <th class="ord"></th>
                   <th>#</th>
                   <th class="who">Player</th>
-                  <th>Pos</th>
+                  <th id="pos-head">Pos</th>
                   <th>AB</th><th>R</th><th>H</th><th>2B</th><th>3B</th><th>HR</th><th>RBI</th><th>BB</th><th>SO</th><th>AVG</th>
+                  <th id="lineup-pick-head">Lineup</th>
                 </tr>
               </thead>
               <tbody id="lineup-body"></tbody>
@@ -675,48 +709,93 @@
               <tbody id="pitch-body"></tbody>
             </table>
           </div>
-          <div class="toolbar">
-            <button type="button" class="btn ghost" id="add-pitcher">New pitcher</button>
-          </div>
+          <label class="play-pick">
+            <span id="pitch-label">Pitcher</span>
+            <select id="pitch-sub" class="sub-pick" aria-label="Sub in a pitcher">
+              <option value="">Sub in a pitcher</option>
+            </select>
+          </label>
         </section>
       </div>
     </div>
 
-    <section class="panel" aria-label="Season">
-      <div class="kicker">Season</div>
-      <p id="season-blurb" class="empty">Save a game and the season line builds in this browser.</p>
-      <div class="book-scroll" id="season-bat-wrap" hidden>
-        <table class="stats" id="season-bat"></table>
-      </div>
-      <div class="book-scroll" id="season-pit-wrap" hidden style="margin-top:12px">
-        <table class="stats" id="season-pit"></table>
-      </div>
-      <ul class="games" id="season-games"></ul>
-    </section>
+    </div>
 
-    <section class="panel legend" aria-label="How to keep the book">
-      <div>
-        <h3>How to keep the book</h3>
-        <ul>
-          <li>Fill in the lineup, opponent, and whether Pomfret is home or away before the first pitch. The visitor bats in the top of the inning.</li>
-          <li>Ball, strike, and foul track the count. Ball four is a walk. Strike three is a strikeout. A foul at two strikes stays at two strikes.</li>
-          <li>Tap the result when the ball is put in play. Bases, outs, the score, and the player line all move together.</li>
-          <li>Stolen base, caught stealing, and wild pitch move runners and leave the at-bat open.</li>
-          <li>Turn on “Advance runners on outs” when a groundout or flyout moves every runner one base. Sacrifice is an out that is not an at-bat.</li>
-          <li>Sub keeps the player’s line and puts a new hitter in that spot. Undo takes back the last play.</li>
-        </ul>
-      </div>
-      <div>
-        <h3>What the numbers mean</h3>
-        <ul>
-          <li><b>AB</b> at-bats. Walks, hit by pitch, and sacrifices are not at-bats. Reaching on an error is an at-bat and not a hit.</li>
-          <li><b>H</b> hits. <b>AVG</b> is hits divided by at-bats. The card also shows on-base and slugging.</li>
-          <li><b>RBI</b> runs driven in on hits, walks, hit by pitch, and sacrifices. Stolen bases and errors do not add an RBI.</li>
-          <li><b>IP</b> is outs divided by three. <b>ERA</b> is earned runs per nine innings. Runs on errors are unearned.</li>
-          <li>Keys: <kbd>B</kbd> ball, <kbd>S</kbd> strike, <kbd>F</kbd> foul, <kbd>1</kbd>–<kbd>4</kbd> hits, <kbd>K</kbd> strikeout, <kbd>W</kbd> walk, <kbd>U</kbd> undo.</li>
-        </ul>
-      </div>
-    </section>
+    <div id="view-roster" class="view" hidden>
+      <section class="panel" aria-label="Roster">
+        <div class="kicker">Roster</div>
+        <p class="empty">25 players. This is the team, and the names the stats follow. Set each game's lineup on Play.</p>
+        <div class="book-scroll">
+          <table class="stats roster-table">
+            <thead>
+              <tr>
+                <th class="ord"></th>
+                <th>#</th>
+                <th class="who">Player</th>
+                <th>Pos</th>
+              </tr>
+            </thead>
+            <tbody id="roster-body"></tbody>
+          </table>
+        </div>
+      </section>
+    </div>
+
+    <div id="view-book" class="view" hidden>
+      <section class="panel" aria-label="Schedule">
+        <div class="kicker">Schedule</div>
+        <p class="record" id="sched-record">No games saved yet.</p>
+        <form class="sched-form" id="sched-form">
+          <label class="field">Date
+            <input id="sched-date" type="date">
+          </label>
+          <label class="field">Time
+            <input id="sched-time" type="time">
+          </label>
+          <label class="field">Opponent
+            <input id="sched-opponent" type="text" maxlength="32" placeholder="Opponent" autocomplete="off" spellcheck="false">
+          </label>
+          <label class="field">Field
+            <input id="sched-site" type="text" maxlength="32" placeholder="Field" autocomplete="off" spellcheck="false">
+          </label>
+          <label class="field">Pomfret is
+            <select id="sched-side" aria-label="Pomfret is">
+              <option value="away">Away</option>
+              <option value="home">Home</option>
+            </select>
+          </label>
+          <button type="submit" class="btn primary">Add game</button>
+        </form>
+        <p id="sched-empty" class="empty">The slate is empty. Add the next game above.</p>
+        <div class="book-scroll" id="sched-wrap" hidden>
+          <table class="stats slate">
+            <thead>
+              <tr>
+                <th class="who">Date</th>
+                <th>Time</th>
+                <th class="who">Opponent</th>
+                <th class="who">Field</th>
+                <th>Side</th>
+                <th>Result</th>
+                <th></th>
+              </tr>
+            </thead>
+            <tbody id="sched-body"></tbody>
+          </table>
+        </div>
+      </section>
+
+      <section class="panel" aria-label="Scorebook">
+        <div class="kicker">Scorebook</div>
+        <p id="season-blurb" class="empty">Save a game from the Play tab and the season line builds here.</p>
+        <div class="book-scroll" id="season-bat-wrap" hidden>
+          <table class="stats" id="season-bat"></table>
+        </div>
+        <div class="book-scroll" id="season-pit-wrap" hidden style="margin-top:12px">
+          <table class="stats" id="season-pit"></table>
+        </div>
+      </section>
+    </div>
     <footer class="note">One file. Open it in any browser. The book is saved on this device until you clear site data.</footer>
   </main>
   <div id="toast" hidden></div>
@@ -725,9 +804,13 @@
 (() => {
   const GAME_KEY = "pomfret-griffins-game-v1";
   const SEASON_KEY = "pomfret-griffins-season-v1";
+  const ROSTER_KEY = "pomfret-griffins-roster-v1";
   const POSITIONS = ["P", "C", "1B", "2B", "3B", "SS", "LF", "CF", "RF", "DH", "EH"];
+  const ROSTER_SIZE = 25;
+  const REGULATION = 7;
   const undoStack = [];
   let state;
+  let roster = [];
 
   const $ = (id) => document.getElementById(id);
 
@@ -764,29 +847,40 @@
       strikes: 0,
       advance: false,
       bases: [null, null, null],
-      runs: { pomfret: Array(9).fill(0), opp: Array(9).fill(0) },
+      runs: { pomfret: Array(REGULATION).fill(0), opp: Array(REGULATION).fill(0) },
       hits: { pomfret: 0, opp: 0 },
       errors: { pomfret: 0, opp: 0 },
       battingIndex: 0,
       lineup: [],
       played: [],
+      oppBattingIndex: 0,
+      oppLineup: [],
       pitchers: [],
       log: [],
-      seq: 0
+      seq: 0,
+      started: false,
+      final: false
     };
     positions.forEach((pos) => s.lineup.push(blankBatter(s, pos)));
+    s.oppLineup = makeOppLineup(s);
     s.pitchers.push(blankPitcher(s));
     return s;
+  }
+  function makeOppLineup(bag) {
+    const lineup = [];
+    for (let i = 0; i < 9; i++) lineup.push(blankBatter(bag, ""));
+    return lineup;
   }
 
   function loadSeason() {
     try {
       const raw = localStorage.getItem(SEASON_KEY);
-      const parsed = raw ? JSON.parse(raw) : { games: [] };
-      if (!parsed || !Array.isArray(parsed.games)) return { games: [] };
-      return parsed;
+      const parsed = raw ? JSON.parse(raw) : null;
+      const season = parsed && Array.isArray(parsed.games) ? parsed : { games: [] };
+      if (!Array.isArray(season.schedule)) season.schedule = [];
+      return season;
     } catch (e) {
-      return { games: [] };
+      return { games: [], schedule: [] };
     }
   }
   function saveSeason(season) {
@@ -806,6 +900,121 @@
       return defaultState();
     }
   }
+  function emptyRosterSlot(n) {
+    return { id: "r" + n, name: "", number: "", pos: "" };
+  }
+  function normalizeRoster(list) {
+    const out = [];
+    const seen = new Set();
+    (Array.isArray(list) ? list : []).forEach((src) => {
+      if (out.length >= ROSTER_SIZE || !src) return;
+      let id = src.id || ("r" + (out.length + 1));
+      if (seen.has(id)) id = "r" + (out.length + 1) + "b";
+      seen.add(id);
+      out.push({
+        id: id,
+        name: src.name || "",
+        number: src.number || "",
+        pos: src.pos || ""
+      });
+    });
+    let n = 1;
+    while (out.length < ROSTER_SIZE) {
+      let id = "r" + n;
+      while (seen.has(id)) { n += 1; id = "r" + n; }
+      seen.add(id);
+      out.push(emptyRosterSlot(id.slice(1)));
+      n += 1;
+    }
+    return out;
+  }
+  function loadRoster() {
+    try {
+      const raw = localStorage.getItem(ROSTER_KEY);
+      if (!raw) return null;
+      const parsed = JSON.parse(raw);
+      if (!Array.isArray(parsed)) return null;
+      return normalizeRoster(parsed);
+    } catch (e) {
+      return null;
+    }
+  }
+  function saveRoster() {
+    try { localStorage.setItem(ROSTER_KEY, JSON.stringify(roster)); } catch (e) { /* keep going */ }
+  }
+  function rosterLabel(guy) {
+    const num = (guy.number || "").trim();
+    const name = (guy.name || "").trim();
+    const pos = guy.pos ? " · " + guy.pos : "";
+    return (num ? "#" + num + " " : "") + name + pos;
+  }
+  function copyFromRoster(player, guy) {
+    player.rosterId = guy.id;
+    player.name = guy.name || "";
+    player.number = guy.number || "";
+  }
+  function syncRosterIntoGame() {
+    const apply = (player) => {
+      if (!player.rosterId) return;
+      const guy = roster.find((r) => r.id === player.rosterId);
+      if (!guy) return;
+      player.name = guy.name || "";
+      player.number = guy.number || "";
+    };
+    state.lineup.forEach(apply);
+    state.played.forEach(apply);
+    state.pitchers.forEach(apply);
+  }
+  function seedRosterFromGame() {
+    const list = [];
+    const claim = (player, pos) => {
+      if (!(player.name || "").trim() && !(player.number || "").trim()) return;
+      const guy = {
+        id: "r" + (list.length + 1),
+        name: player.name || "",
+        number: player.number || "",
+        pos: pos || player.pos || ""
+      };
+      list.push(guy);
+      player.rosterId = guy.id;
+    };
+    state.lineup.forEach((p) => claim(p, p.pos));
+    state.played.forEach((p) => claim(p, p.pos));
+    state.pitchers.forEach((p) => {
+      const name = (p.name || "").trim().toLowerCase();
+      const num = (p.number || "").trim();
+      const match = name || num
+        ? list.find((r) => (r.name || "").trim().toLowerCase() === name && (r.number || "").trim() === num)
+        : null;
+      if (match) { p.rosterId = match.id; return; }
+      claim(p, "P");
+    });
+    return normalizeRoster(list);
+  }
+  function linkGameToRoster() {
+    const pool = state.lineup.concat(state.played, state.pitchers);
+    pool.forEach((player) => {
+      if (player.rosterId && roster.some((r) => r.id === player.rosterId)) return;
+      const name = (player.name || "").trim().toLowerCase();
+      const num = (player.number || "").trim();
+      if (!name && !num) return;
+      const guy = roster.find((r) => (r.name || "").trim().toLowerCase() === name && (r.number || "").trim() === num);
+      if (guy) player.rosterId = guy.id;
+    });
+  }
+  function namedRoster() {
+    return roster.filter((r) => (r.name || "").trim());
+  }
+  function availableBatters() {
+    const used = new Set();
+    state.lineup.forEach((p) => { if (p.rosterId) used.add(p.rosterId); });
+    state.played.forEach((p) => { if (p.rosterId) used.add(p.rosterId); });
+    return namedRoster().filter((r) => !used.has(r.id));
+  }
+  function availablePitchers() {
+    const used = new Set(state.pitchers.map((p) => p.rosterId).filter(Boolean));
+    return namedRoster().filter((r) => !used.has(r.id));
+  }
 
   function snapshot() {
     undoStack.push(JSON.stringify(state));
@@ -822,17 +1031,37 @@
   function pomfretBatting() {
     return state.pomfretHome ? state.half === "bottom" : state.half === "top";
   }
+  function showingPomfret() {
+    return !state.started || pomfretBatting();
+  }
   function battingTeam() { return pomfretBatting() ? "pomfret" : "opp"; }
   function fieldingTeam() { return pomfretBatting() ? "opp" : "pomfret"; }
   function currentBatter() {
     const i = Math.min(state.battingIndex, state.lineup.length - 1);
     return state.lineup[i];
   }
+  function currentOppBatter() {
+    const list = state.oppLineup || [];
+    if (!list.length) return null;
+    const i = Math.min(state.oppBattingIndex || 0, list.length - 1);
+    return list[i];
+  }
+  function plateBatter() {
+    return pomfretBatting() ? currentBatter() : currentOppBatter();
+  }
+  function plateIndex() {
+    return pomfretBatting() ? state.battingIndex : (state.oppBattingIndex || 0);
+  }
+  function homeKey() { return state.pomfretHome ? "pomfret" : "opp"; }
+  function awayKey() { return state.pomfretHome ? "opp" : "pomfret"; }
   function currentPitcher() {
     return state.pitchers.find((p) => p.current) || state.pitchers[state.pitchers.length - 1];
   }
   function findPlayer(id) {
-    return state.lineup.find((p) => p.id === id) || state.played.find((p) => p.id === id) || null;
+    return state.lineup.find((p) => p.id === id) ||
+      state.played.find((p) => p.id === id) ||
+      (state.oppLineup || []).find((p) => p.id === id) ||
+      null;
   }
   function playerLabel(p, index) {
     const name = (p.name || "").trim() || ("Batter " + (index + 1));
@@ -840,18 +1069,24 @@
     return num ? "#" + num + " " + name : name;
   }
   function currentWho() {
-    if (!pomfretBatting()) return "Opponent";
-    return playerLabel(currentBatter(), state.battingIndex);
+    const b = plateBatter();
+    return b ? playerLabel(b, plateIndex()) : "Batter";
   }
   function labelPlayer(p) {
     if (!p) return "Runner";
     const live = state.lineup.indexOf(p);
+    if (live >= 0) return playerLabel(p, live);
+    const opp = (state.oppLineup || []).indexOf(p);
+    if (opp >= 0) return playerLabel(p, opp);
     const old = state.played.indexOf(p);
-    return playerLabel(p, live >= 0 ? live : Math.max(old, 0));
+    return playerLabel(p, Math.max(old, 0));
+  }
+  function hasActivity(game) {
+    return game.log.length > 0 || game.balls > 0 || game.strikes > 0 || game.outs > 0 ||
+      game.bases.some(Boolean) || game.inning > 1 || game.half !== "top";
   }
   function gameStarted() {
-    return state.log.length > 0 || state.balls > 0 || state.strikes > 0 || state.outs > 0 ||
-      state.bases.some(Boolean) || state.inning > 1 || state.half !== "top";
+    return !!state.started;
   }
   function baseWord(dest) {
     return ["first", "second", "third"][dest] || "home";
@@ -863,7 +1098,7 @@
     return "POM " + sum(state.runs.pomfret) + "–" + sum(state.runs.opp);
   }
   function ensureInnings() {
-    const need = Math.max(9, state.inning);
+    const need = Math.max(REGULATION, state.inning);
     while (state.runs.pomfret.length < need) {
       state.runs.pomfret.push(0);
       state.runs.opp.push(0);
@@ -922,12 +1157,12 @@
     return { bases: next, scored };
   }
   function batterOrOpp() {
-    if (pomfretBatting()) return currentBatter().id;
-    return makeId(state).replace("id", "o");
+    const b = plateBatter();
+    return b ? b.id : makeId(state);
   }
   function chargeCounting(opts) {
-    if (pomfretBatting()) {
-      const b = currentBatter();
+    const b = plateBatter();
+    if (b) {
       if (opts.ab) b.ab += 1;
       if (opts.hit) b.h += 1;
       if (opts.extra === 2) b.doubles += 1;
@@ -937,7 +1172,8 @@
       if (opts.so) b.so += 1;
       if (opts.hbp) b.hbp += 1;
       if (opts.sac) b.sac += 1;
-    } else {
+    }
+    if (!pomfretBatting()) {
       const p = currentPitcher();
       if (opts.hit) p.h += 1;
       if (opts.bb) p.bb += 1;
@@ -953,7 +1189,10 @@
     if (!ids.length) return;
     ensureInnings();
     state.runs[battingTeam()][state.inning - 1] += ids.length;
-    if (opts.rbi && pomfretBatting()) currentBatter().rbi += ids.length;
+    if (opts.rbi) {
+      const b = plateBatter();
+      if (b) b.rbi += ids.length;
+    }
     if (!pomfretBatting()) {
       const pit = currentPitcher();
       pit.r += ids.length;
@@ -967,20 +1206,42 @@
     return state.outs >= 3;
   }
   function endHalf() {
+    const finished = state.half;
+    const inning = state.inning;
     state.bases = [null, null, null];
     state.outs = 0;
     state.balls = 0;
     state.strikes = 0;
-    if (state.half === "top") state.half = "bottom";
+    const home = sum(state.runs[homeKey()]);
+    const away = sum(state.runs[awayKey()]);
+    if (inning >= REGULATION && finished === "top" && home > away) {
+      state.outs = 3;
+      state.final = true;
+      return;
+    }
+    if (inning >= REGULATION && finished === "bottom" && home !== away) {
+      state.outs = 3;
+      state.final = true;
+      return;
+    }
+    if (finished === "top") state.half = "bottom";
     else {
       state.half = "top";
       state.inning += 1;
     }
     ensureInnings();
   }
+  function settleGame() {
+    if (state.final || state.inning < REGULATION || state.half !== "bottom") return;
+    if (sum(state.runs[homeKey()]) > sum(state.runs[awayKey()])) state.final = true;
+  }
   function advanceBatter() {
-    if (!state.lineup.length) return;
-    state.battingIndex = (state.battingIndex + 1) % state.lineup.length;
+    if (pomfretBatting()) {
+      if (!state.lineup.length) return;
+      state.battingIndex = (state.battingIndex + 1) % state.lineup.length;
+    } else if (state.oppLineup && state.oppLineup.length) {
+      state.oppBattingIndex = ((state.oppBattingIndex || 0) + 1) % state.oppLineup.length;
+    }
   }
   function pushLog(stamp, message) {
     state.log.unshift(stamp + " · " + message + " · " + scoreLine());
@@ -988,13 +1249,13 @@
   }
   function closePlay(message, ended, plateAppearance) {
     const stamp = halfLabel();
-    const ourPlate = plateAppearance && pomfretBatting();
-    if (ourPlate) advanceBatter();
+    if (plateAppearance) advanceBatter();
     if (ended) endHalf();
     else if (plateAppearance) {
       state.balls = 0;
       state.strikes = 0;
     }
+    settleGame();
     pushLog(stamp, message);
     hideChooser();
     persist();
@@ -1218,6 +1479,7 @@
     const name = labelPlayer(p);
     const stamp = halfLabel();
     if (ended) endHalf();
+    settleGame();
     pushLog(stamp, name + " caught stealing");
     hideChooser();
     persist();
@@ -1230,13 +1492,26 @@
   }
 
   function paint() {
+    syncRosterIntoGame();
     ensureInnings();
     if (state.battingIndex >= state.lineup.length) state.battingIndex = 0;
+    if (!state.oppLineup) state.oppLineup = [];
+    if (state.oppBattingIndex >= state.oppLineup.length) state.oppBattingIndex = 0;
     setIfIdle($("date"), state.date);
     setIfIdle($("opponent"), state.opponent);
     setIfIdle($("site"), state.site);
     $("advance").checked = !!state.advance;
     const locked = gameStarted();
+    const live = locked && !state.final;
+    $("start-game").hidden = locked;
+    $("pregame").hidden = locked;
+    $("final-note").hidden = !state.final;
+    $("final-note").textContent = state.inning > REGULATION ? "Final, in " + state.inning : "Final";
+    $("lineup-pick-head").textContent = locked ? "Sub" : "Lineup";
+    $("pitch-label").textContent = locked ? "Pitcher" : "Starter";
+    document.querySelectorAll(".pad button").forEach((btn) => { btn.disabled = !live; });
+    $("play-menu").disabled = !live;
+    $("add-batter").hidden = locked || !showingPomfret();
     $("side-away").disabled = locked;
     $("side-home").disabled = locked;
     $("side-away").classList.toggle("on", !state.pomfretHome);
@@ -1252,10 +1527,13 @@
     syncLineup();
     syncPitchers();
     paintSeason(season);
+    paintSchedule(season);
+    paintRoster();
+    paintPitchMenu();
   }
 
   function paintBoard() {
-    const inns = Math.max(9, state.inning, state.runs.pomfret.length);
+    const inns = Math.max(REGULATION, state.inning);
     const topTeam = state.pomfretHome ? "opp" : "pomfret";
     let head = "<tr><th class='team'> </th>";
     for (let i = 0; i < inns; i++) head += "<th>" + (i + 1) + "</th>";
@@ -1263,9 +1541,10 @@
     const row = (team, label, cls) => {
       let html = "<tr class='" + cls + "'><td class='team'>" + label + "</td>";
       for (let i = 0; i < inns; i++) {
-        const started = i < state.inning - 1 || (i === state.inning - 1 && (team === topTeam || state.half === "bottom"));
-        const now = i === state.inning - 1 && started;
-        const val = started ? (state.runs[team][i] || 0) : "";
+        const skipped = state.final && state.half === "top" && i === state.inning - 1 && team !== topTeam;
+        const started = !skipped && (i < state.inning - 1 || (i === state.inning - 1 && (team === topTeam || state.half === "bottom")));
+        const now = !state.final && i === state.inning - 1 && started;
+        const val = skipped ? "X" : started ? (state.runs[team][i] || 0) : "";
         html += "<td class='" + (now ? "now" : "") + "' data-team='" + team + "' data-inn='" + (i + 1) + "'>" + val + "</td>";
       }
       html += "<td class='tot' data-score='" + team + "'>" + sum(state.runs[team]) + "</td>";
@@ -1283,34 +1562,24 @@
   }
 
   function paintSpot() {
-    const ours = pomfretBatting();
-    const b = currentBatter();
-    $("who-role").textContent = ours ? "Now batting" : "On the mound";
+    const ours = showingPomfret();
+    const b = ours ? currentBatter() : currentOppBatter();
+    const spot = ours ? state.battingIndex : (state.oppBattingIndex || 0);
     const pit = currentPitcher();
-    if (ours) {
-      $("who-name").textContent = playerLabel(b, state.battingIndex);
-      $("who-meta").textContent = halfLabel() + " · " + (b.pos || "—") + " · " + oppName();
+    $("who-role").textContent = state.final ? "Final" : "Now batting";
+    if (b) {
+      $("who-name").textContent = playerLabel(b, spot);
+      $("who-meta").textContent = halfLabel() + " · " + (ours ? ((b.pos || "—") + " · " + oppName()) : oppName());
       const singles = b.h - b.doubles - b.triples - b.hr;
       const tb = singles + 2 * b.doubles + 3 * b.triples + 4 * b.hr;
       $("who-slash").innerHTML =
         statBit(formatAvg(b.h, b.ab), "AVG") +
         statBit(formatRate(b.h + b.bb + b.hbp, b.ab + b.bb + b.hbp + b.sac), "OBP") +
         statBit(formatRate(tb, b.ab), "SLG");
-    } else {
-      const pname = (pit.name || "").trim() || "Pitcher";
-      const pnum = (pit.number || "").trim();
-      $("who-name").textContent = pnum ? "#" + pnum + " " + pname : pname;
-      $("who-meta").textContent = halfLabel() + " · Pomfret in the field · " + oppName() + " batting";
-      $("who-slash").innerHTML =
-        statBit(formatIP(pit.outs), "IP") +
-        statBit(String(pit.so), "SO") +
-        statBit(formatERA(pit), "ERA");
     }
-    paintField(ours, b, pit);
-    const due = ours ? "" : "<div class='who-meta'>Due up " + playerLabel(b, state.battingIndex) + "</div>";
-    $("mound").innerHTML = ours
-      ? "<div class='who-meta'>Pitching " + (((pit.name || "").trim() || "Pitcher")) + " · " + formatIP(pit.outs) + " IP</div>"
-      : due;
+    paintField(pomfretBatting(), ours ? b : currentBatter(), pit);
+    const pname = ((pit.name || "").trim() || "Pitcher");
+    $("mound").innerHTML = "<div class='who-meta'>Pitching " + pname + " · " + formatIP(pit.outs) + " IP</div>";
   }
   function shortName(p) {
     const name = (p.name || "").trim();
@@ -1355,11 +1624,14 @@
       const runner = id ? findPlayer(id) : null;
       if (runner) {
         const idx = state.lineup.indexOf(runner);
+        const oppIdx = (state.oppLineup || []).indexOf(runner);
+        const spot = idx >= 0 ? idx : oppIdx;
+        const label = spot >= 0 ? playerLabel(runner, spot) : "Runner";
         paintSlot(el, {
-          num: (runner.number || "").trim() || "•",
-          name: shortName(runner) || playerLabel(runner, idx < 0 ? 0 : idx),
+          num: (runner.number || "").trim() || (spot >= 0 ? String(spot + 1) : "•"),
+          name: shortName(runner) || label,
           on: true,
-          title: "On " + bag[n] + ": " + playerLabel(runner, idx < 0 ? 0 : idx)
+          title: "On " + bag[n] + ": " + label
         });
       } else if (id) {
         paintSlot(el, { num: "R", name: "Runner", on: true, title: "Runner on " + bag[n] });
@@ -1368,16 +1640,19 @@
       }
     });
     const ab = $("pos-AB");
-    if (ours && batter) {
+    const oppUp = state.started && !ours;
+    const up = oppUp ? currentOppBatter() : batter;
+    const upIndex = oppUp ? (state.oppBattingIndex || 0) : state.battingIndex;
+    if (up) {
       paintSlot(ab, {
-        num: (batter.number || "").trim() || String(state.battingIndex + 1),
-        name: shortName(batter) || batter.pos || "At bat",
+        num: (up.number || "").trim() || String(upIndex + 1),
+        name: shortName(up) || (oppUp ? "At bat" : (up.pos || "At bat")),
         filled: true,
         atBat: true,
-        title: "At bat: " + playerLabel(batter, state.battingIndex)
+        title: "At bat: " + playerLabel(up, upIndex)
       });
     } else {
-      paintSlot(ab, { num: "AB", name: "Opponent", filled: false, atBat: false, title: "Opponent at bat" });
+      paintSlot(ab, { num: "AB", name: "At bat", filled: false, atBat: false, title: "At bat" });
     }
   }
   function statBit(value, label) {
@@ -1419,21 +1694,31 @@
   }
 
   function syncLineup() {
+    const ours = showingPomfret();
+    const list = ours ? state.lineup : (state.oppLineup || []);
+    $("bat-kicker").textContent = ours ? "Pomfret batting" : oppName() + " batting";
+    $("pos-head").hidden = !ours;
+    $("lineup-pick-head").hidden = !ours;
+    $("played").hidden = !ours;
     const body = $("lineup-body");
+    const mode = (state.started ? "live" : "set") + (ours ? "-pom" : "-opp");
     const rows = [...body.querySelectorAll("tr")];
-    const same = rows.length === state.lineup.length && rows.every((tr, i) => tr.dataset.id === state.lineup[i].id);
-    if (!same) buildLineup();
-    else updateLineupStats();
-    const all = state.lineup.concat(state.played);
+    const same = body.dataset.mode === mode && rows.length === list.length && rows.every((tr, i) => tr.dataset.id === list[i].id);
+    if (!same) {
+      body.dataset.mode = mode;
+      buildLineup();
+    } else updateLineupStats();
+    const all = ours ? state.lineup.concat(state.played) : list;
     const tot = all.reduce((a, p) => {
       ["ab", "r", "h", "doubles", "triples", "hr", "rbi", "bb", "so"].forEach((k) => { a[k] += p[k]; });
       return a;
     }, { ab: 0, r: 0, h: 0, doubles: 0, triples: 0, hr: 0, rbi: 0, bb: 0, so: 0 });
-    $("lineup-foot").innerHTML = "<tr><td></td><td></td><td class='who'>Team</td><td></td><td>" +
-      [tot.ab, tot.r, tot.h, tot.doubles, tot.triples, tot.hr, tot.rbi, tot.bb, tot.so, formatAvg(tot.h, tot.ab)].join("</td><td>") +
-      "</td></tr>";
+    const nums = [tot.ab, tot.r, tot.h, tot.doubles, tot.triples, tot.hr, tot.rbi, tot.bb, tot.so, formatAvg(tot.h, tot.ab)].join("</td><td>");
+    $("lineup-foot").innerHTML = ours
+      ? "<tr><td></td><td></td><td class='who'>Team</td><td></td><td>" + nums + "</td><td></td></tr>"
+      : "<tr><td></td><td></td><td class='who'>Team</td><td>" + nums + "</td></tr>";
     const played = $("played");
-    if (!state.played.length) { played.textContent = ""; return; }
+    if (!ours || !state.played.length) { played.textContent = ""; return; }
     played.textContent = "Left the game: " + state.played.map((p) => {
       const i = 0;
       return playerLabel(p, i).replace("Batter 1", (p.name || "Sub")) + " " + p.h + "-" + p.ab;
@@ -1442,13 +1727,15 @@
   function buildLineup() {
     const body = $("lineup-body");
     body.innerHTML = "";
-    state.lineup.forEach((player, index) => {
+    const ours = showingPomfret();
+    const list = ours ? state.lineup : (state.oppLineup || []);
+    list.forEach((player, index) => {
       const tr = document.createElement("tr");
       tr.dataset.id = player.id;
-      tr.appendChild(orderCell(index));
-      tr.appendChild(numCell(player));
-      tr.appendChild(nameCell(player, "Name"));
-      tr.appendChild(posCell(player));
+      tr.appendChild(ours ? orderCell(index) : orderLabel(index));
+      tr.appendChild(ours ? textCell((player.number || "").trim(), "number") : editCell(player, "number"));
+      tr.appendChild(ours ? textCell((player.name || "").trim(), "name", true) : editCell(player, "name"));
+      if (ours) tr.appendChild(state.started ? textCell(player.pos || "", "pos") : posGameCell(index));
       ["ab", "r", "h", "doubles", "triples", "hr", "rbi", "bb", "so"].forEach((key) => {
         const td = document.createElement("td");
         td.dataset.stat = key;
@@ -1459,6 +1746,7 @@
       avg.dataset.stat = "avg";
       avg.textContent = formatAvg(player.h, player.ab);
       tr.appendChild(avg);
+      if (ours) tr.appendChild(subCell(index));
       body.appendChild(tr);
     });
     updateLineupStats();
@@ -1466,16 +1754,50 @@
   function orderCell(index) {
     const td = document.createElement("td");
     td.className = "ord";
-    const wrap = document.createElement("div");
-    wrap.className = "rowbtns";
+    const line = document.createElement("div");
+    line.className = "ord-line";
     const label = document.createElement("b");
     label.textContent = String(index + 1);
     label.style.width = "1.1em";
-    const up = mini("↑", () => moveLineup(index, -1));
-    const down = mini("↓", () => moveLineup(index, 1));
-    const sub = mini("Sub", () => subBatter(index));
-    wrap.append(label, up, down, sub);
-    td.appendChild(wrap);
+    line.appendChild(label);
+    if (!state.started) {
+      const wrap = document.createElement("div");
+      wrap.className = "rowbtns";
+      const up = mini("↑", () => moveLineup(index, -1));
+      const down = mini("↓", () => moveLineup(index, 1));
+      up.setAttribute("aria-label", "Move batter " + (index + 1) + " up");
+      down.setAttribute("aria-label", "Move batter " + (index + 1) + " down");
+      wrap.append(up, down);
+      line.appendChild(wrap);
+    }
+    td.appendChild(line);
+    return td;
+  }
+  function orderLabel(index) {
+    const td = document.createElement("td");
+    td.className = "ord";
+    const label = document.createElement("b");
+    label.textContent = String(index + 1);
+    td.appendChild(label);
+    return td;
+  }
+  function editCell(player, field) {
+    const td = document.createElement("td");
+    if (field === "name") td.className = "who";
+    const input = document.createElement("input");
+    input.type = "text";
+    input.maxLength = field === "number" ? 3 : 24;
+    input.value = player[field] || "";
+    input.dataset.edit = field;
+    input.placeholder = field === "number" ? "#" : "Name";
+    if (field === "number") input.className = "num";
+    input.setAttribute("aria-label", (field === "number" ? "Number" : "Name") + " for opponent batter");
+    input.addEventListener("input", () => {
+      player[field] = input.value;
+      persist();
+      paint();
+    });
+    td.appendChild(input);
     return td;
   }
   function mini(text, fn) {
@@ -1486,35 +1808,18 @@
     b.addEventListener("click", fn);
     return b;
   }
-  function numCell(player) {
+  function textCell(value, field, who) {
     const td = document.createElement("td");
-    const input = document.createElement("input");
-    input.className = "num";
-    input.maxLength = 3;
-    input.inputMode = "numeric";
-    input.value = player.number;
-    input.autocomplete = "off";
-    input.addEventListener("input", () => { player.number = input.value; persist(); paint(); });
-    td.appendChild(input);
+    if (who) td.className = "who";
+    td.dataset.field = field;
+    td.textContent = value || "—";
     return td;
   }
-  function nameCell(player, placeholder) {
-    const td = document.createElement("td");
-    td.className = "who";
-    const input = document.createElement("input");
-    input.type = "text";
-    input.placeholder = placeholder;
-    input.maxLength = 24;
-    input.value = player.name;
-    input.autocomplete = "off";
-    input.spellcheck = false;
-    input.addEventListener("input", () => { player.name = input.value; persist(); paint(); });
-    td.appendChild(input);
-    return td;
-  }
-  function posCell(player) {
+  function posGameCell(index) {
     const td = document.createElement("td");
     const select = document.createElement("select");
+    select.className = "pos-pick";
+    select.setAttribute("aria-label", "Position for batter " + (index + 1));
     const blank = document.createElement("option");
     blank.value = "";
     blank.textContent = "—";
@@ -1525,43 +1830,142 @@
       opt.textContent = pos;
       select.appendChild(opt);
     });
-    select.value = player.pos || "";
-    select.addEventListener("change", () => { player.pos = select.value; persist(); });
+    select.value = state.lineup[index].pos || "";
+    select.addEventListener("change", () => {
+      state.lineup[index].pos = select.value;
+      persist();
+      paint();
+    });
     td.appendChild(select);
     return td;
   }
+  function subCell(index) {
+    const td = document.createElement("td");
+    const select = document.createElement("select");
+    select.className = "sub-pick";
+    select.setAttribute("aria-label", (state.started ? "Sub for batter " : "Lineup spot ") + (index + 1));
+    select.addEventListener("change", () => {
+      if (state.started) {
+        if (!select.value) return;
+        subIn(index, select.value);
+      } else {
+        assignBatter(index, select.value);
+      }
+    });
+    if (state.started) fillSubSelect(select);
+    else fillLineupSelect(select, index);
+    td.appendChild(select);
+    return td;
+  }
+  function fillLineupSelect(select, index) {
+    const player = state.lineup[index];
+    const used = new Set();
+    state.lineup.forEach((p, i) => { if (i !== index && p.rosterId) used.add(p.rosterId); });
+    const choices = namedRoster().filter((r) => !used.has(r.id));
+    select.innerHTML = "";
+    const placeholder = document.createElement("option");
+    placeholder.value = "";
+    placeholder.textContent = choices.length ? "Set" : "Roster empty";
+    select.appendChild(placeholder);
+    choices.forEach((guy) => {
+      const opt = document.createElement("option");
+      opt.value = guy.id;
+      opt.textContent = rosterLabel(guy);
+      select.appendChild(opt);
+    });
+    if (player.rosterId && [...select.options].some((opt) => opt.value === player.rosterId)) select.value = player.rosterId;
+  }
+  function assignBatter(index, rosterId) {
+    const player = state.lineup[index];
+    if (!player || state.started) return;
+    if (!rosterId) {
+      player.rosterId = "";
+      player.name = "";
+      player.number = "";
+      persist();
+      paint();
+      return;
+    }
+    const guy = roster.find((r) => r.id === rosterId);
+    if (!guy || player.rosterId === rosterId) return;
+    const spotPos = player.pos;
+    copyFromRoster(player, guy);
+    player.pos = guy.pos || spotPos || "";
+    persist();
+    paint();
+  }
+  function fillSubSelect(select) {
+    const bench = availableBatters();
+    select.innerHTML = "";
+    const placeholder = document.createElement("option");
+    placeholder.value = "";
+    placeholder.textContent = bench.length ? "Sub" : "Bench empty";
+    select.appendChild(placeholder);
+    bench.forEach((guy) => {
+      const opt = document.createElement("option");
+      opt.value = guy.id;
+      opt.textContent = rosterLabel(guy);
+      select.appendChild(opt);
+    });
+  }
   function updateLineupStats() {
+    const ours = showingPomfret();
+    const list = ours ? state.lineup : (state.oppLineup || []);
+    const at = ours ? state.battingIndex : (state.oppBattingIndex || 0);
     [...$("lineup-body").querySelectorAll("tr")].forEach((tr, index) => {
-      const player = state.lineup[index];
-      const ours = pomfretBatting();
-      tr.classList.toggle("active", ours && index === state.battingIndex);
-      tr.classList.toggle("due", !ours && index === state.battingIndex);
+      const player = list[index];
+      if (!player) return;
+      tr.classList.toggle("active", index === at);
+      tr.classList.toggle("due", false);
+      tr.querySelectorAll("td[data-field]").forEach((cell) => {
+        const key = cell.dataset.field;
+        const value = key === "number" ? (player.number || "").trim() : key === "name" ? (player.name || "").trim() : (player.pos || "");
+        cell.textContent = value || "—";
+      });
+      tr.querySelectorAll("input[data-edit]").forEach((input) => {
+        if (document.activeElement === input) return;
+        const key = input.dataset.edit;
+        if (input.value !== (player[key] || "")) input.value = player[key] || "";
+      });
       tr.querySelectorAll("[data-stat]").forEach((cell) => {
         const key = cell.dataset.stat;
         cell.textContent = key === "avg" ? formatAvg(player.h, player.ab) : player[key];
       });
+      const pos = tr.querySelector("select.pos-pick");
+      if (pos && document.activeElement !== pos) pos.value = player.pos || "";
+      const sub = tr.querySelector("select.sub-pick");
+      if (sub && document.activeElement !== sub) {
+        if (state.started) fillSubSelect(sub);
+        else fillLineupSelect(sub, index);
+      }
     });
   }
   function moveLineup(index, dir) {
+    if (state.started) return;
     const j = index + dir;
     if (j < 0 || j >= state.lineup.length) return;
     snapshot();
     const [row] = state.lineup.splice(index, 1);
     state.lineup.splice(j, 0, row);
-    if (state.battingIndex === index) state.battingIndex = j;
-    else if (state.battingIndex === j) state.battingIndex = index;
+    state.battingIndex = 0;
     persist();
     paint();
   }
-  function subBatter(index) {
-    snapshot();
+  function subIn(index, rosterId) {
+    const guy = roster.find((r) => r.id === rosterId);
     const old = state.lineup[index];
-    state.played.push(old);
-    const neu = blankBatter(state, old.pos);
+    if (!guy || !old || old.rosterId === rosterId) return;
+    snapshot();
+    const occupied = (old.name || "").trim() || old.rosterId;
+    if (gameStarted() && occupied) state.played.push(old);
+    const neu = blankBatter(state, guy.pos || old.pos || "EH");
+    copyFromRoster(neu, guy);
+    neu.pos = guy.pos || old.pos || "";
     state.lineup.splice(index, 1, neu);
+    hideChooser();
     persist();
     paint();
-    toast("Sub in for " + (old.name || "that spot"));
+    toast((guy.name || "Player") + " is in");
   }
 
   function syncPitchers() {
@@ -1578,6 +1982,10 @@
           tr.querySelector("[data-stat='" + key + "']").textContent = p[key];
         });
         tr.querySelector("[data-stat='era']").textContent = formatERA(p);
+        const num = tr.querySelector("[data-field='number']");
+        const name = tr.querySelector("[data-field='name']");
+        if (num) num.textContent = (p.number || "").trim() || "—";
+        if (name) name.textContent = (p.name || "").trim() || "—";
         const use = tr.querySelector("button.mini");
         if (use) use.textContent = p.current ? "In" : "Use";
       });
@@ -1590,8 +1998,8 @@
       const tr = document.createElement("tr");
       tr.dataset.id = p.id;
       tr.classList.toggle("active", !!p.current);
-      tr.appendChild(pitchNum(p));
-      tr.appendChild(nameCell(p, "Pitcher"));
+      tr.appendChild(textCell((p.number || "").trim(), "number"));
+      tr.appendChild(textCell((p.name || "").trim(), "name", true));
       const ip = document.createElement("td");
       ip.dataset.stat = "ip";
       ip.textContent = formatIP(p.outs);
@@ -1613,16 +2021,6 @@
       body.appendChild(tr);
     });
   }
-  function pitchNum(p) {
-    const td = document.createElement("td");
-    const input = document.createElement("input");
-    input.className = "num";
-    input.maxLength = 3;
-    input.value = p.number;
-    input.addEventListener("input", () => { p.number = input.value; persist(); paint(); });
-    td.appendChild(input);
-    return td;
-  }
   function setPitcher(id) {
     snapshot();
     state.pitchers.forEach((p) => { p.current = p.id === id; });
@@ -1635,8 +2033,6 @@
     $("season-blurb").hidden = games.length > 0;
     $("season-bat-wrap").hidden = games.length === 0;
     $("season-pit-wrap").hidden = games.length === 0;
-    const list = $("season-games");
-    list.innerHTML = "";
     if (!games.length) return;
     const batters = new Map();
     const pitchers = new Map();
@@ -1648,21 +2044,333 @@
       [p.g, p.ab, p.r, p.h, p.doubles, p.triples, p.hr, p.rbi, p.bb, p.so, formatAvg(p.h, p.ab)]);
     $("season-pit").innerHTML = seasonTable("Pitching", [...pitchers.values()], ["G", "IP", "H", "R", "ER", "BB", "SO", "ERA"], (p) =>
       [p.g, formatIP(p.outs), p.h, p.r, p.er, p.bb, p.so, formatERA(p)]);
-    games.slice().reverse().forEach((g) => {
-      const li = document.createElement("li");
-      const letter = g.rP > g.rO ? "W" : g.rP < g.rO ? "L" : "T";
-      const span = document.createElement("span");
-      span.innerHTML = "<b class='wl'>" + letter + "</b> " + esc(g.date) + " vs " + esc(g.opponent) + " · POM " + g.rP + "–" + g.rO;
-      const rm = mini("Remove", () => {
-        if (!confirm("Remove this game from the season?")) return;
-        const next = loadSeason();
-        next.games = next.games.filter((x) => x.id !== g.id);
-        saveSeason(next);
-        paint();
+  }
+  function formatDate(iso) {
+    if (!iso) return "—";
+    const parts = iso.split("-").map(Number);
+    const months = ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"];
+    if (!parts[1] || !parts[2]) return iso;
+    const year = parts[0] === new Date().getFullYear() ? "" : ", " + parts[0];
+    return months[parts[1] - 1] + " " + parts[2] + year;
+  }
+  function formatTime(value) {
+    if (!value) return "";
+    const bits = value.split(":");
+    const h = Number(bits[0]);
+    const m = Number(bits[1]);
+    if (Number.isNaN(h) || Number.isNaN(m)) return value;
+    const ap = h >= 12 ? "PM" : "AM";
+    return (h % 12 || 12) + ":" + String(m).padStart(2, "0") + " " + ap;
+  }
+  function scheduleRows(season) {
+    const rows = season.schedule.map((s) => ({
+      kind: "plan",
+      id: s.id,
+      date: s.date || "",
+      time: s.time || "",
+      opponent: s.opponent || "Opponent",
+      site: s.site || "",
+      pomfretHome: !!s.pomfretHome,
+      game: season.games.find((g) => g.id === s.gameId) || null,
+      open: s.gameId === state.gameId
+    }));
+    const linked = new Set(season.schedule.map((s) => s.gameId).filter(Boolean));
+    season.games.forEach((g) => {
+      if (linked.has(g.id)) return;
+      rows.push({
+        kind: "saved",
+        id: g.id,
+        date: g.date || "",
+        time: "",
+        opponent: g.opponent || "Opponent",
+        site: g.site || "",
+        pomfretHome: !!g.pomfretHome,
+        game: g,
+        open: g.id === state.gameId
       });
-      li.append(span, rm);
-      list.appendChild(li);
     });
+    const openMatters = gameStarted() || (state.opponent || "").trim() || season.games.some((g) => g.id === state.gameId);
+    if (!rows.some((r) => r.open) && openMatters) {
+      rows.push({
+        kind: "live",
+        id: state.gameId,
+        date: state.date || "",
+        time: "",
+        opponent: (state.opponent || "").trim() || "Opponent",
+        site: state.site || "",
+        pomfretHome: !!state.pomfretHome,
+        game: season.games.find((g) => g.id === state.gameId) || null,
+        open: true
+      });
+    }
+    rows.sort((a, b) => (a.date || "9999").localeCompare(b.date || "9999") || (a.time || "").localeCompare(b.time || ""));
+    return rows;
+  }
+  function paintSchedule(season) {
+    const games = season.games;
+    const wins = games.filter((g) => g.rP > g.rO).length;
+    const losses = games.filter((g) => g.rP < g.rO).length;
+    const ties = games.filter((g) => g.rP === g.rO).length;
+    $("sched-record").textContent = games.length
+      ? "Season " + wins + "–" + losses + (ties ? "–" + ties : "")
+      : "No games saved yet.";
+    if (!$("sched-date").value) $("sched-date").value = today();
+    const rows = scheduleRows(season);
+    const body = $("sched-body");
+    body.innerHTML = "";
+    $("sched-empty").hidden = rows.length > 0;
+    $("sched-wrap").hidden = rows.length === 0;
+    rows.forEach((row) => {
+      const tr = document.createElement("tr");
+      if (row.open) tr.className = "active";
+      const cells = [
+        formatDate(row.date),
+        formatTime(row.time) || "—",
+        row.opponent,
+        row.site || "—",
+        row.pomfretHome ? "Home" : "Away"
+      ];
+      cells.forEach((text) => {
+        const td = document.createElement("td");
+        td.textContent = text;
+        tr.appendChild(td);
+      });
+      const result = document.createElement("td");
+      if (row.game) {
+        const letter = row.game.rP > row.game.rO ? "W" : row.game.rP < row.game.rO ? "L" : "T";
+        result.innerHTML = "<b class='wl'>" + letter + "</b> POM " + row.game.rP + "–" + row.game.rO;
+      } else if (row.open && gameStarted()) {
+        result.textContent = "In progress";
+      } else if (row.open) {
+        result.textContent = "Open";
+        result.className = "muted";
+      } else {
+        result.textContent = "Scheduled";
+        result.className = "muted";
+      }
+      tr.appendChild(result);
+      const act = document.createElement("td");
+      act.className = "act";
+      const buttons = document.createElement("span");
+      buttons.className = "rowbtns";
+      if (row.kind === "plan" && !row.game) {
+        buttons.appendChild(mini(row.open ? "Play" : "Score", () => openSchedule(row.id)));
+      } else if (row.open) {
+        buttons.appendChild(mini("Play", () => showTab("play")));
+      }
+      if (row.kind !== "live" || row.game) {
+        buttons.appendChild(mini("Remove", () => removeScheduleRow(row)));
+      }
+      act.appendChild(buttons);
+      tr.appendChild(act);
+      body.appendChild(tr);
+    });
+  }
+  function showTab(name) {
+    ["play", "roster", "book"].forEach((id) => {
+      const on = name === id;
+      $("view-" + id).hidden = !on;
+      $("tab-" + id).classList.toggle("on", on);
+      $("tab-" + id).setAttribute("aria-selected", on ? "true" : "false");
+    });
+  }
+  function rosterChanged() {
+    saveRoster();
+    syncRosterIntoGame();
+    persist();
+    paint();
+  }
+  function paintRoster() {
+    const body = $("roster-body");
+    const rows = [...body.querySelectorAll("tr")];
+    const same = rows.length === roster.length && rows.every((tr, i) => tr.dataset.id === roster[i].id);
+    if (!same) buildRoster();
+  }
+  function buildRoster() {
+    const body = $("roster-body");
+    body.innerHTML = "";
+    roster.forEach((guy, index) => {
+      const tr = document.createElement("tr");
+      tr.dataset.id = guy.id;
+      const order = document.createElement("td");
+      order.className = "ord";
+      const wrap = document.createElement("div");
+      wrap.className = "rowbtns";
+      const label = document.createElement("b");
+      label.textContent = String(index + 1);
+      label.style.width = "1.4em";
+      wrap.append(label, mini("↑", () => moveRoster(index, -1)), mini("↓", () => moveRoster(index, 1)));
+      order.appendChild(wrap);
+      tr.appendChild(order);
+      tr.appendChild(rosterInput(guy, "number", "num", 3));
+      tr.appendChild(rosterInput(guy, "name", "", 24));
+      tr.appendChild(rosterPos(guy));
+      body.appendChild(tr);
+    });
+  }
+  function rosterInput(guy, key, className, max) {
+    const td = document.createElement("td");
+    if (key === "name") td.className = "name";
+    const input = document.createElement("input");
+    input.type = "text";
+    if (className) input.className = className;
+    input.maxLength = max;
+    input.value = guy[key] || "";
+    input.placeholder = key === "name" ? "Name" : "";
+    input.autocomplete = "off";
+    input.spellcheck = false;
+    if (key === "number") input.inputMode = "numeric";
+    input.addEventListener("input", () => {
+      guy[key] = input.value;
+      rosterChanged();
+    });
+    td.appendChild(input);
+    return td;
+  }
+  function rosterPos(guy) {
+    const td = document.createElement("td");
+    const select = document.createElement("select");
+    const blank = document.createElement("option");
+    blank.value = "";
+    blank.textContent = "—";
+    select.appendChild(blank);
+    POSITIONS.forEach((pos) => {
+      const opt = document.createElement("option");
+      opt.value = pos;
+      opt.textContent = pos;
+      select.appendChild(opt);
+    });
+    select.value = guy.pos || "";
+    select.addEventListener("change", () => {
+      guy.pos = select.value;
+      rosterChanged();
+    });
+    td.appendChild(select);
+    return td;
+  }
+  function moveRoster(index, dir) {
+    const j = index + dir;
+    if (j < 0 || j >= roster.length) return;
+    const [row] = roster.splice(index, 1);
+    roster.splice(j, 0, row);
+    rosterChanged();
+  }
+  function paintPitchMenu() {
+    const menu = $("pitch-sub");
+    if (document.activeElement === menu) return;
+    const arms = state.started ? availablePitchers() : namedRoster();
+    menu.innerHTML = "";
+    const placeholder = document.createElement("option");
+    placeholder.value = "";
+    placeholder.textContent = arms.length ? (state.started ? "Sub in a pitcher" : "Set the pitcher") : "No pitchers on the roster";
+    menu.appendChild(placeholder);
+    arms.forEach((guy) => {
+      const opt = document.createElement("option");
+      opt.value = guy.id;
+      opt.textContent = rosterLabel(guy);
+      menu.appendChild(opt);
+    });
+  }
+  function addPitcherFromRoster(rosterId) {
+    const guy = roster.find((r) => r.id === rosterId);
+    if (!guy) return;
+    if (!state.started) {
+      const neu = blankPitcher(state);
+      copyFromRoster(neu, guy);
+      neu.current = true;
+      state.pitchers = [neu];
+      persist();
+      paint();
+      return;
+    }
+    snapshot();
+    state.pitchers.forEach((p) => { p.current = false; });
+    const neu = blankPitcher(state);
+    copyFromRoster(neu, guy);
+    neu.current = true;
+    state.pitchers.push(neu);
+    persist();
+    paint();
+    toast((guy.name || "Pitcher") + " is in");
+  }
+  function addSchedule(event) {
+    event.preventDefault();
+    const opponent = $("sched-opponent").value.trim();
+    if (!opponent) { toast("Name the opponent"); return; }
+    const season = loadSeason();
+    season.schedule.push({
+      id: "s" + Date.now().toString(36),
+      date: $("sched-date").value || today(),
+      time: $("sched-time").value || "",
+      opponent: opponent,
+      site: $("sched-site").value.trim(),
+      pomfretHome: $("sched-side").value === "home",
+      gameId: ""
+    });
+    saveSeason(season);
+    $("sched-opponent").value = "";
+    $("sched-site").value = "";
+    $("sched-time").value = "";
+    paint();
+    toast("Added to the schedule");
+  }
+  function carryRoster(next) {
+    const order = state.lineup.map((p) => p.rosterId || "");
+    while (next.lineup.length < order.length && next.lineup.length < 15) next.lineup.push(blankBatter(next, "EH"));
+    order.forEach((rid, i) => {
+      const guy = roster.find((r) => r.id === rid);
+      if (!guy || !next.lineup[i]) return;
+      copyFromRoster(next.lineup[i], guy);
+    });
+    const current = state.pitchers.find((p) => p.current) || state.pitchers[0];
+    const arm = current && roster.find((r) => r.id === current.rosterId);
+    if (arm) copyFromRoster(next.pitchers[0], arm);
+    order.forEach((rid, i) => {
+      if (!next.lineup[i] || !state.lineup[i]) return;
+      if (!rid) return;
+      next.lineup[i].pos = state.lineup[i].pos || next.lineup[i].pos || "";
+    });
+  }
+  function openSchedule(id) {
+    const season = loadSeason();
+    const entry = season.schedule.find((s) => s.id === id);
+    if (!entry) return;
+    if (entry.gameId && entry.gameId === state.gameId) { showTab("play"); return; }
+    if (gameStarted() && !confirm("Leave the game you're scoring and start this one? Save it to the season first if you want that play-by-play kept.")) return;
+    const next = defaultState();
+    carryRoster(next);
+    next.date = entry.date || today();
+    next.opponent = entry.opponent || "";
+    next.site = entry.site || "";
+    next.pomfretHome = !!entry.pomfretHome;
+    next.scheduleId = entry.id;
+    entry.gameId = next.gameId;
+    state = next;
+    undoStack.length = 0;
+    saveSeason(season);
+    persist();
+    showTab("play");
+    paint();
+    toast("Game opened");
+  }
+  function removeScheduleRow(row) {
+    const season = loadSeason();
+    if (row.kind === "plan") {
+      const entry = season.schedule.find((s) => s.id === row.id);
+      const saved = entry && season.games.some((g) => g.id === entry.gameId);
+      const message = saved
+        ? "Remove this game from the schedule and the season?"
+        : "Remove this game from the schedule?";
+      if (!confirm(message)) return;
+      season.schedule = season.schedule.filter((s) => s.id !== row.id);
+      if (saved) season.games = season.games.filter((g) => g.id !== entry.gameId);
+    } else {
+      if (!confirm("Remove this game from the season?")) return;
+      season.games = season.games.filter((g) => g.id !== row.id);
+      season.schedule = season.schedule.filter((s) => s.gameId !== row.id);
+    }
+    saveSeason(season);
+    paint();
   }
   function keyOf(p) {
     const name = (p.name || "").trim().toLowerCase();
@@ -1710,6 +2418,7 @@
       site: state.site,
       rP: sum(state.runs.pomfret),
       rO: sum(state.runs.opp),
+      pomfretHome: !!state.pomfretHome,
       batters: state.lineup.concat(state.played).filter((b) => b.name || b.ab || b.bb || b.hbp || b.r || b.h || b.sac).map(slimB),
       pitchers: state.pitchers.filter((p) => p.name || p.outs || p.h || p.bb || p.so || p.r).map((p) => ({
         id: p.id, name: p.name, number: p.number, outs: p.outs, h: p.h, r: p.r, er: p.er, bb: p.bb, so: p.so, pitches: p.pitches
@@ -1722,6 +2431,30 @@
     const idx = season.games.findIndex((g) => g.id === snap.id);
     if (idx >= 0) season.games[idx] = snap;
     else season.games.push(snap);
+    let row = state.scheduleId ? season.schedule.find((s) => s.id === state.scheduleId) : null;
+    if (!row) row = season.schedule.find((s) => s.gameId === snap.id);
+    if (!row) {
+      row = {
+        id: "s" + Date.now().toString(36),
+        date: snap.date,
+        time: "",
+        opponent: snap.opponent,
+        site: state.site || "",
+        pomfretHome: !!state.pomfretHome,
+        gameId: snap.id
+      };
+      season.schedule.push(row);
+      state.scheduleId = row.id;
+      persist();
+    } else {
+      row.gameId = snap.id;
+      row.date = snap.date || row.date;
+      row.opponent = snap.opponent || row.opponent;
+      row.site = state.site || row.site;
+      row.pomfretHome = !!state.pomfretHome;
+      state.scheduleId = row.id;
+      persist();
+    }
     saveSeason(season);
     paint();
     toast(idx >= 0 ? "Season updated" : "Game saved to season");
@@ -1742,6 +2475,17 @@
     lines.push(pad("Player", 22) + "AB  R  H  2B 3B HR RBI BB SO AVG");
     state.lineup.concat(state.played).forEach((p, i) => {
       const name = playerLabel(p, state.lineup.indexOf(p) === -1 ? i : state.lineup.indexOf(p));
+      lines.push(
+        pad(name.slice(0, 21), 22) +
+        [p.ab, p.r, p.h, p.doubles, p.triples, p.hr, p.rbi, p.bb, p.so].map((n) => pad(n, 3)).join(" ") +
+        formatAvg(p.h, p.ab)
+      );
+    });
+    lines.push("");
+    lines.push((oppName().toUpperCase()) + " BATTING");
+    lines.push(pad("Player", 22) + "AB  R  H  2B 3B HR RBI BB SO AVG");
+    (state.oppLineup || []).forEach((p, i) => {
+      const name = playerLabel(p, i);
       lines.push(
         pad(name.slice(0, 21), 22) +
         [p.ab, p.r, p.h, p.doubles, p.triples, p.hr, p.rbi, p.bb, p.so].map((n) => pad(n, 3)).join(" ") +
@@ -1778,25 +2522,28 @@
     }
   }
 
+  function startGame() {
+    if (state.started) return;
+    const holes = state.lineup.length < 9 || state.lineup.some((p) => !(p.name || "").trim() && !p.rosterId);
+    if (holes) { toast("Set all nine batters"); return; }
+    const pit = currentPitcher();
+    if (!pit || (!(pit.name || "").trim() && !pit.rosterId)) { toast("Set the pitcher"); return; }
+    snapshot();
+    state.battingIndex = 0;
+    state.started = true;
+    persist();
+    paint();
+    toast("Play ball");
+  }
   function newGame() {
-    if (!confirm("Start a new game? The lineup names stay. This game's plays are cleared.")) return;
-    const roster = state.lineup.map((p) => ({ name: p.name, number: p.number, pos: p.pos }));
-    const arms = state.pitchers.map((p) => ({ name: p.name, number: p.number }));
+    if (!confirm("New game? The lineup stays so you can change it before the first pitch. Plays are cleared.")) return;
     const meta = { opponent: state.opponent, site: state.site, pomfretHome: state.pomfretHome };
-    state = defaultState();
-    roster.forEach((r, i) => {
-      if (!state.lineup[i]) state.lineup[i] = blankBatter(state, r.pos);
-      state.lineup[i].name = r.name;
-      state.lineup[i].number = r.number;
-      state.lineup[i].pos = r.pos;
-    });
-    if (arms[0]) {
-      state.pitchers[0].name = arms[0].name;
-      state.pitchers[0].number = arms[0].number;
-    }
-    state.opponent = meta.opponent;
-    state.site = meta.site;
-    state.pomfretHome = meta.pomfretHome;
+    const next = defaultState();
+    carryRoster(next);
+    next.opponent = meta.opponent;
+    next.site = meta.site;
+    next.pomfretHome = meta.pomfretHome;
+    state = next;
     undoStack.length = 0;
     persist();
     paint();
@@ -1830,7 +2577,7 @@
   }
 
   function downloadBackup() {
-    const blob = new Blob([JSON.stringify({ game: state, season: loadSeason() }, null, 2)], { type: "application/json" });
+    const blob = new Blob([JSON.stringify({ game: state, season: loadSeason(), roster: roster }, null, 2)], { type: "application/json" });
     const a = document.createElement("a");
     a.href = URL.createObjectURL(blob);
     a.download = "pomfret-griffins-scorebook.json";
@@ -1843,8 +2590,12 @@
       try {
         const data = JSON.parse(reader.result);
         if (!data || !data.game || !Array.isArray(data.game.lineup)) throw new Error("bad");
-        if (!confirm("Replace the open game and season with this backup?")) return;
+        if (!confirm("Replace the open game, roster, and season with this backup?")) return;
         state = data.game;
+        if (Array.isArray(data.roster)) {
+          roster = normalizeRoster(data.roster);
+          saveRoster();
+        }
         if (data.season && Array.isArray(data.season.games)) saveSeason(data.season);
         undoStack.length = 0;
         persist();
@@ -1860,15 +2611,39 @@
   document.body.addEventListener("click", (e) => {
     const btn = e.target.closest("[data-act]");
     if (!btn) return;
+    if (!state.started) { toast("Start the game first"); return; }
+    if (state.final) { toast("Game's over"); return; }
     const fn = actions[btn.dataset.act];
     if (fn) fn(btn);
   });
+  $("play-menu").addEventListener("change", () => {
+    const menu = $("play-menu");
+    const opt = menu.selectedOptions[0];
+    const act = opt && opt.value;
+    menu.value = "";
+    if (!act) return;
+    if (!state.started) { toast("Start the game first"); return; }
+    if (state.final) { toast("Game's over"); return; }
+    const fn = actions[act];
+    if (fn) fn({ dataset: { n: opt.dataset.n || "", kind: opt.dataset.kind || "" } });
+  });
+  $("tab-play").addEventListener("click", () => showTab("play"));
+  $("tab-roster").addEventListener("click", () => showTab("roster"));
+  $("tab-book").addEventListener("click", () => showTab("book"));
+  $("pitch-sub").addEventListener("change", () => {
+    const menu = $("pitch-sub");
+    const id = menu.value;
+    menu.value = "";
+    if (id) addPitcherFromRoster(id);
+  });
+  $("sched-form").addEventListener("submit", addSchedule);
   $("date").addEventListener("input", () => { state.date = $("date").value; persist(); });
   $("opponent").addEventListener("input", () => { state.opponent = $("opponent").value; persist(); paint(); });
   $("site").addEventListener("input", () => { state.site = $("site").value; persist(); });
   $("advance").addEventListener("change", () => { state.advance = $("advance").checked; persist(); });
   $("side-away").addEventListener("click", () => { if (gameStarted()) return; state.pomfretHome = false; persist(); paint(); });
   $("side-home").addEventListener("click", () => { if (gameStarted()) return; state.pomfretHome = true; persist(); paint(); });
+  $("start-game").addEventListener("click", startGame);
   $("new-game").addEventListener("click", newGame);
   $("undo").addEventListener("click", undo);
   $("copy").addEventListener("click", copyBook);
@@ -1881,16 +2656,10 @@
     if (file) restoreBackup(file);
   });
   $("add-batter").addEventListener("click", () => {
+    if (state.started) { toast("The lineup is set"); return; }
     if (state.lineup.length >= 15) { toast("Lineup is full"); return; }
     snapshot();
     state.lineup.push(blankBatter(state, "EH"));
-    persist();
-    paint();
-  });
-  $("add-pitcher").addEventListener("click", () => {
-    snapshot();
-    state.pitchers.forEach((p) => { p.current = false; });
-    state.pitchers.push(blankPitcher(state));
     persist();
     paint();
   });
@@ -1904,16 +2673,36 @@
     if (map[key]) {
       e.preventDefault();
       if (key === "u") undo();
+      else if (!state.started) toast("Start the game first");
+      else if (state.final) toast("Game's over");
       else actions[map[key]]();
       return;
     }
     if (["1", "2", "3", "4"].includes(e.key)) {
       e.preventDefault();
+      if (!state.started) { toast("Start the game first"); return; }
+      if (state.final) { toast("Game's over"); return; }
       actions.hit({ dataset: { n: e.key } });
     }
   });
 
   state = loadGame();
+  roster = loadRoster();
+  if (!roster) {
+    roster = seedRosterFromGame();
+    saveRoster();
+  } else {
+    linkGameToRoster();
+  }
+  if (!state.started && hasActivity(state)) state.started = true;
+  if (!state.started) state.battingIndex = 0;
+  if (!Array.isArray(state.oppLineup) || state.oppLineup.length < 9) {
+    state.oppLineup = makeOppLineup(state);
+    state.oppBattingIndex = 0;
+  }
+  if (state.oppBattingIndex == null) state.oppBattingIndex = 0;
+  if (state.final == null) state.final = false;
+  persist();
   paint();
 })();
 </script>
