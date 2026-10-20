@@ -435,6 +435,71 @@
   }
   #toast[hidden] { display: none; }
 
+  .name-link {
+    background: none;
+    border: 0;
+    padding: 0;
+    color: var(--red-deep);
+    font-weight: 800;
+    text-decoration: underline;
+    text-underline-offset: 2px;
+    text-align: left;
+  }
+  .roster-name {
+    background: none;
+    border: 0;
+    padding: 4px 2px;
+    font-weight: 800;
+    text-align: left;
+    color: inherit;
+  }
+  .roster-name:hover { text-decoration: underline; text-underline-offset: 2px; }
+  td.glance b { display: block; line-height: 1.05; }
+  td.glance span {
+    display: block;
+    font-size: 10px;
+    letter-spacing: 0.06em;
+    text-transform: uppercase;
+    color: var(--muted);
+    font-weight: 800;
+  }
+  .profile {
+    position: fixed;
+    inset: 0;
+    z-index: 30;
+    background: rgba(18, 13, 12, 0.55);
+    display: flex;
+    justify-content: center;
+    align-items: flex-start;
+    padding: 28px 14px;
+    overflow: auto;
+  }
+  .profile[hidden] { display: none; }
+  .profile-card {
+    width: min(760px, 100%);
+    background: var(--paper);
+    border: 1px solid var(--black);
+    box-shadow: 8px 8px 0 var(--black);
+    padding: 16px;
+  }
+  .profile-top { display: flex; justify-content: space-between; align-items: flex-start; gap: 12px; }
+  .profile-title {
+    display: block;
+    width: 100%;
+    border: 0;
+    background: transparent;
+    font-size: clamp(32px, 6vw, 52px);
+    line-height: 0.9;
+    text-transform: uppercase;
+    font-weight: 800;
+    padding: 0;
+  }
+  .profile-meta { color: var(--muted); font-weight: 700; margin: 4px 0 12px; }
+  .slash { display: flex; flex-wrap: wrap; gap: 12px 18px; margin: 4px 0 12px; }
+  .slash div { display: flex; flex-direction: column; min-width: 3.2em; }
+  .slash b { font-size: 22px; line-height: 1; }
+  .slash span { font-size: 11px; letter-spacing: 0.08em; text-transform: uppercase; color: var(--muted); font-weight: 800; }
+
   @media (max-width: 900px) {
     .meta, .layout, .park-layout, .sched-form { grid-template-columns: 1fr 1fr; }
   }
@@ -445,7 +510,7 @@
     .lamp strong { font-size: 28px; }
   }
   @media print {
-    .band, .toolbar, .pad, .group, .play-pick, .switch, #chooser, .rowbtns, #toast, .lede-wrap, .tabs, .sched-form { display: none !important; }
+    .band, .toolbar, .pad, .group, .play-pick, .switch, #chooser, .rowbtns, #toast, .lede-wrap, .tabs, .sched-form, .profile { display: none !important; }
     .view, .view[hidden] { display: block !important; }
     body { background: white; }
     .panel { box-shadow: none; }
@@ -724,7 +789,7 @@
     <div id="view-roster" class="view" hidden>
       <section class="panel" aria-label="Roster">
         <div class="kicker">Roster</div>
-        <p class="empty">25 players. This is the team, and the names the stats follow. Set each game's lineup on Play.</p>
+        <p class="empty">25 players. This is the team, and the names the stats follow. Click a name for that player's page. Set each game's lineup on Play.</p>
         <div class="book-scroll">
           <table class="stats roster-table">
             <thead>
@@ -733,6 +798,10 @@
                 <th>#</th>
                 <th class="who">Player</th>
                 <th>Pos</th>
+                <th class="glance"></th>
+                <th class="glance"></th>
+                <th class="glance"></th>
+                <th class="glance"></th>
               </tr>
             </thead>
             <tbody id="roster-body"></tbody>
@@ -798,6 +867,19 @@
     </div>
     <footer class="note">One file. Open it in any browser. The book is saved on this device until you clear site data.</footer>
   </main>
+  <div id="profile" class="profile" hidden>
+    <div class="profile-card" role="dialog" aria-modal="true" aria-labelledby="profile-name">
+      <div class="profile-top">
+        <div>
+          <div class="kicker" id="profile-kicker">Player</div>
+          <input id="profile-name" class="profile-title" maxlength="24" aria-label="Name" autocomplete="off" spellcheck="false">
+          <p class="profile-meta" id="profile-meta"></p>
+        </div>
+        <button type="button" class="btn ghost" id="profile-close">Close</button>
+      </div>
+      <div id="profile-body"></div>
+    </div>
+  </div>
   <div id="toast" hidden></div>
 
 <script>
@@ -1114,12 +1196,31 @@
     const v = num / den;
     return v >= 1 ? v.toFixed(3) : v.toFixed(3).slice(1);
   }
+  function formatOPS(b) {
+    const ab = b.ab || 0;
+    const chances = ab + (b.bb || 0) + (b.hbp || 0) + (b.sac || 0);
+    if (!ab || !chances) return "—";
+    const obp = ((b.h || 0) + (b.bb || 0) + (b.hbp || 0)) / chances;
+    const slg = totalBases(b) / ab;
+    const v = obp + slg;
+    return v >= 1 ? v.toFixed(3) : v.toFixed(3).slice(1);
+  }
+  function formatBABIP(b) {
+    const hitsInPlay = (b.h || 0) - (b.hr || 0);
+    const ballsInPlay = (b.ab || 0) - (b.so || 0) - (b.hr || 0);
+    return formatRate(hitsInPlay, ballsInPlay);
+  }
   function formatIP(outs) {
     return Math.floor(outs / 3) + "." + (outs % 3);
   }
   function formatERA(p) {
     if (!p.outs) return p.er ? "INF" : "0.00";
     return ((27 * p.er) / p.outs).toFixed(2);
+  }
+  function formatWHIP(p) {
+    const runners = (p.h || 0) + (p.bb || 0);
+    if (!p.outs) return runners ? "INF" : "0.00";
+    return (runners * 3 / p.outs).toFixed(2);
   }
   function oppName() {
     return (state.opponent || "").trim() || "Opponent";
@@ -1530,6 +1631,7 @@
     paintSchedule(season);
     paintRoster();
     paintPitchMenu();
+    if (!$("profile").hidden) paintProfile($("profile").dataset.id || "", $("profile").dataset.key || "");
   }
 
   function paintBoard() {
@@ -1734,7 +1836,7 @@
       tr.dataset.id = player.id;
       tr.appendChild(ours ? orderCell(index) : orderLabel(index));
       tr.appendChild(ours ? textCell((player.number || "").trim(), "number") : editCell(player, "number"));
-      tr.appendChild(ours ? textCell((player.name || "").trim(), "name", true) : editCell(player, "name"));
+      tr.appendChild(ours ? textCell((player.name || "").trim(), "name", true, player) : editCell(player, "name"));
       if (ours) tr.appendChild(state.started ? textCell(player.pos || "", "pos") : posGameCell(index));
       ["ab", "r", "h", "doubles", "triples", "hr", "rbi", "bb", "so"].forEach((key) => {
         const td = document.createElement("td");
@@ -1808,12 +1910,26 @@
     b.addEventListener("click", fn);
     return b;
   }
-  function textCell(value, field, who) {
+  function textCell(value, field, who, player) {
     const td = document.createElement("td");
     if (who) td.className = "who";
     td.dataset.field = field;
+    if (field === "name" && player && player.rosterId) {
+      td.appendChild(nameButton(value, player.rosterId));
+      return td;
+    }
     td.textContent = value || "—";
     return td;
+  }
+  function nameButton(value, rosterId, key) {
+    const btn = document.createElement("button");
+    btn.type = "button";
+    btn.className = "name-link";
+    btn.textContent = (value || "").trim() || "—";
+    if (rosterId) btn.dataset.roster = rosterId;
+    if (key) btn.dataset.key = key;
+    btn.addEventListener("click", () => openProfile(btn.dataset.roster || "", btn.dataset.key || ""));
+    return btn;
   }
   function posGameCell(index) {
     const td = document.createElement("td");
@@ -1920,7 +2036,9 @@
       tr.querySelectorAll("td[data-field]").forEach((cell) => {
         const key = cell.dataset.field;
         const value = key === "number" ? (player.number || "").trim() : key === "name" ? (player.name || "").trim() : (player.pos || "");
-        cell.textContent = value || "—";
+        const link = cell.querySelector(".name-link");
+        if (link) link.textContent = value || "—";
+        else cell.textContent = value || "—";
       });
       tr.querySelectorAll("input[data-edit]").forEach((input) => {
         if (document.activeElement === input) return;
@@ -2044,6 +2162,8 @@
       [p.g, p.ab, p.r, p.h, p.doubles, p.triples, p.hr, p.rbi, p.bb, p.so, formatAvg(p.h, p.ab)]);
     $("season-pit").innerHTML = seasonTable("Pitching", [...pitchers.values()], ["G", "IP", "H", "R", "ER", "BB", "SO", "ERA"], (p) =>
       [p.g, formatIP(p.outs), p.h, p.r, p.er, p.bb, p.so, formatERA(p)]);
+    bindProfileLinks($("season-bat"));
+    bindProfileLinks($("season-pit"));
   }
   function formatDate(iso) {
     if (!iso) return "—";
@@ -2183,8 +2303,9 @@
   function paintRoster() {
     const body = $("roster-body");
     const rows = [...body.querySelectorAll("tr")];
-    const same = rows.length === roster.length && rows.every((tr, i) => tr.dataset.id === roster[i].id);
+    const same = rows.length === roster.length && rows.every((tr, i) => tr.dataset.id === roster[i].id && tr.querySelectorAll("td.glance").length === 4);
     if (!same) buildRoster();
+    updateRosterGlance();
   }
   function buildRoster() {
     const body = $("roster-body");
@@ -2203,8 +2324,13 @@
       order.appendChild(wrap);
       tr.appendChild(order);
       tr.appendChild(rosterInput(guy, "number", "num", 3));
-      tr.appendChild(rosterInput(guy, "name", "", 24));
+      tr.appendChild(rosterNameCell(guy));
       tr.appendChild(rosterPos(guy));
+      for (let i = 0; i < 4; i++) {
+        const td = document.createElement("td");
+        td.className = "glance";
+        tr.appendChild(td);
+      }
       body.appendChild(tr);
     });
   }
@@ -2226,6 +2352,76 @@
     });
     td.appendChild(input);
     return td;
+  }
+  function rosterNameCell(guy) {
+    const td = document.createElement("td");
+    td.className = "who";
+    if ((guy.name || "").trim()) td.appendChild(rosterNameButton(guy));
+    else td.appendChild(rosterNameInput(guy, td));
+    return td;
+  }
+  function rosterNameButton(guy) {
+    const btn = document.createElement("button");
+    btn.type = "button";
+    btn.className = "roster-name";
+    btn.textContent = (guy.name || "").trim();
+    btn.addEventListener("click", () => openProfile(guy.id, ""));
+    return btn;
+  }
+  function rosterNameInput(guy, td) {
+    const input = document.createElement("input");
+    input.type = "text";
+    input.maxLength = 24;
+    input.value = guy.name || "";
+    input.placeholder = "Name";
+    input.autocomplete = "off";
+    input.spellcheck = false;
+    input.addEventListener("input", () => {
+      guy.name = input.value;
+      rosterChanged();
+    });
+    input.addEventListener("blur", () => {
+      if (!(guy.name || "").trim() || !input.isConnected) return;
+      td.innerHTML = "";
+      td.appendChild(rosterNameButton(guy));
+    });
+    return input;
+  }
+  function rosterGlanceBits(guy, lines) {
+    if (guy.pos === "P") {
+      return [
+        { value: formatERA(lines.pit), label: "ERA" },
+        { value: formatWHIP(lines.pit), label: "WHIP" },
+        { value: String(lines.pit.so || 0), label: "SO" }
+      ];
+    }
+    const bat = lines.bat;
+    return [
+      { value: formatAvg(bat.h, bat.ab), label: "AVG" },
+      { value: formatRate(totalBases(bat), bat.ab), label: "SLG" },
+      { value: formatRate((bat.h || 0) + (bat.bb || 0) + (bat.hbp || 0), (bat.ab || 0) + (bat.bb || 0) + (bat.hbp || 0) + (bat.sac || 0)), label: "OBP" },
+      { value: String(bat.h || 0), label: "H" }
+    ];
+  }
+  function updateRosterGlance() {
+    const games = profileGames();
+    [...$("roster-body").querySelectorAll("tr")].forEach((tr, index) => {
+      const guy = roster[index];
+      if (!guy) return;
+      const btn = tr.querySelector(".roster-name");
+      const named = (guy.name || "").trim();
+      if (btn && document.activeElement !== btn) btn.textContent = named;
+      if (!named && btn && document.activeElement !== $("profile-name")) {
+        const cell = btn.parentElement;
+        cell.innerHTML = "";
+        cell.appendChild(rosterNameInput(guy, cell));
+      }
+      const bits = rosterGlanceBits(guy, tallyPlayer(guy, games));
+      tr.querySelectorAll("td.glance").forEach((cell, i) => {
+        const bit = bits[i];
+        cell.innerHTML = bit ? "<b>" + esc(String(bit.value)) + "</b><span>" + esc(bit.label) + "</span>" : "";
+      });
+    });
   }
   function rosterPos(guy) {
     const td = document.createElement("td");
@@ -2372,6 +2568,135 @@
     saveSeason(season);
     paint();
   }
+  function playerKey(p) {
+    const name = (p.name || "").trim().toLowerCase();
+    const num = (p.number || "").trim();
+    if (!name && !num) return "";
+    return num + "|" + name;
+  }
+  function findRosterPlayer(rosterId, key) {
+    return roster.find((r) => rosterId && r.id === rosterId) || roster.find((r) => key && playerKey(r) === key) || null;
+  }
+  function sameRosterPlayer(record, guy) {
+    if (!record || !guy) return false;
+    if (record.rosterId && record.rosterId === guy.id) return true;
+    const key = playerKey(guy);
+    return !!key && playerKey(record) === key;
+  }
+  function profileGames() {
+    const season = loadSeason();
+    const games = season.games.slice();
+    const live = gameSnapshot();
+    const idx = games.findIndex((g) => g.id === live.id);
+    const counts = gameStarted() || (state.opponent || "").trim() || live.batters.length || live.pitchers.length;
+    if (idx >= 0) games[idx] = live;
+    else if (counts) games.push(live);
+    games.sort((a, b) => (a.date || "").localeCompare(b.date || ""));
+    return games;
+  }
+  function blankLine() {
+    return { g: 0, ab: 0, r: 0, h: 0, doubles: 0, triples: 0, hr: 0, rbi: 0, bb: 0, so: 0, hbp: 0, sac: 0, sb: 0, cs: 0, outs: 0, er: 0, pitches: 0 };
+  }
+  function addLine(tot, src, fields) {
+    tot.g += 1;
+    fields.forEach((f) => { tot[f] += src[f] || 0; });
+  }
+  function totalBases(b) {
+    return (b.h || 0) + (b.doubles || 0) + 2 * (b.triples || 0) + 3 * (b.hr || 0);
+  }
+  function tallyPlayer(guy, games) {
+    const bat = blankLine();
+    const pit = blankLine();
+    const rows = [];
+    (games || profileGames()).forEach((g) => {
+      const b = (g.batters || []).find((p) => sameRosterPlayer(p, guy));
+      const arm = (g.pitchers || []).find((p) => sameRosterPlayer(p, guy));
+      if (b) addLine(bat, b, ["ab", "r", "h", "doubles", "triples", "hr", "rbi", "bb", "so", "hbp", "sac", "sb", "cs"]);
+      if (arm) addLine(pit, arm, ["outs", "h", "r", "er", "bb", "so", "pitches"]);
+      if (b || arm) rows.push({ game: g, bat: b || null, pit: arm || null });
+    });
+    return { bat, pit, games: rows };
+  }
+  function openProfile(rosterId, key) {
+    const guy = findRosterPlayer(rosterId, key);
+    if (!guy || !(guy.name || "").trim()) { toast("Name them on the roster"); return; }
+    $("profile").dataset.id = guy.id;
+    $("profile").dataset.key = playerKey(guy);
+    $("profile").hidden = false;
+    paintProfile(guy.id, playerKey(guy));
+  }
+  function closeProfile() {
+    $("profile").hidden = true;
+    $("profile").dataset.id = "";
+    $("profile").dataset.key = "";
+  }
+  function paintProfile(rosterId, key) {
+    const guy = findRosterPlayer(rosterId, key);
+    if (!guy) { closeProfile(); return; }
+    const num = (guy.number || "").trim();
+    const name = (guy.name || "").trim() || "Unnamed";
+    $("profile-kicker").textContent = guy.pos ? guy.pos : "Player";
+    if (document.activeElement !== $("profile-name")) $("profile-name").value = name;
+    $("profile-meta").textContent = [num ? "#" + num : "", "Pomfret Griffins"].filter(Boolean).join(" · ");
+    const lines = tallyPlayer(guy);
+    const bat = lines.bat;
+    const pit = lines.pit;
+    const games = lines.games;
+    const body = $("profile-body");
+    const obp = formatRate((bat.h || 0) + (bat.bb || 0) + (bat.hbp || 0), (bat.ab || 0) + (bat.bb || 0) + (bat.hbp || 0) + (bat.sac || 0));
+    let html = "<div class='kicker'>Batting</div><div class='slash'>" +
+      statBit(String(bat.g), "G") + statBit(String(bat.ab), "AB") + statBit(String(bat.h), "H") +
+      statBit(formatAvg(bat.h, bat.ab), "AVG") + statBit(obp, "OBP") + statBit(formatRate(totalBases(bat), bat.ab), "SLG") +
+      statBit(formatOPS(bat), "OPS") + statBit(formatBABIP(bat), "BABIP") +
+      "</div>";
+    html += profileTable(
+      ["G", "AB", "R", "H", "2B", "3B", "HR", "RBI", "BB", "SO", "HBP", "SAC", "SB", "CS"],
+      [[bat.g, bat.ab, bat.r, bat.h, bat.doubles, bat.triples, bat.hr, bat.rbi, bat.bb, bat.so, bat.hbp, bat.sac, bat.sb, bat.cs]]
+    );
+    const pitched = pit.g > 0;
+    if (pitched) {
+      html += "<div class='kicker'>Pitching</div><div class='slash'>" +
+        statBit(String(pit.g), "G") + statBit(formatIP(pit.outs), "IP") + statBit(String(pit.so), "SO") + statBit(formatERA(pit), "ERA") +
+        "</div>";
+      html += profileTable(
+        ["G", "IP", "H", "R", "ER", "BB", "SO", "PC"],
+        [[pit.g, formatIP(pit.outs), pit.h, pit.r, pit.er, pit.bb, pit.so, pit.pitches]]
+      );
+    }
+    html += "<div class='kicker'>Games</div>";
+    if (!games.length) {
+      html += "<p class='empty'>No games yet. This page fills in as the line is saved, and the open game counts while it is being scored.</p>";
+    } else {
+      html += "<div class='book-scroll'><table class='stats'><thead><tr><th class='who'>Date</th><th class='who'>Opponent</th><th>Result</th><th class='who'>Line</th></tr></thead><tbody>";
+      games.forEach((row) => {
+        const g = row.game;
+        const letter = g.rP > g.rO ? "W" : g.rP < g.rO ? "L" : "T";
+        const bits = [];
+        if (row.bat) bits.push(row.bat.h + "-" + row.bat.ab);
+        if (row.bat && row.bat.hr) bits.push(row.bat.hr + " HR");
+        if (row.bat && row.bat.rbi) bits.push(row.bat.rbi + " RBI");
+        if (row.bat && row.bat.r) bits.push(row.bat.r + " R");
+        if (row.bat && row.bat.bb) bits.push(row.bat.bb + " BB");
+        if (row.bat && row.bat.so) bits.push(row.bat.so + " SO");
+        if (row.pit) bits.push(formatIP(row.pit.outs) + " IP, " + row.pit.er + " ER");
+        html += "<tr><td class='who'>" + esc(formatDate(g.date)) + "</td><td class='who'>" + esc(g.opponent || "Opponent") +
+          "</td><td><b class='wl'>" + letter + "</b> " + g.rP + "–" + g.rO + "</td><td class='who'>" + esc(bits.join(", ") || "—") + "</td></tr>";
+      });
+      html += "</tbody></table></div>";
+    }
+    body.innerHTML = html;
+  }
+  function profileTable(headers, rows) {
+    let html = "<div class='book-scroll'><table class='stats'><thead><tr>";
+    headers.forEach((h) => { html += "<th>" + h + "</th>"; });
+    html += "</tr></thead><tbody>";
+    rows.forEach((row) => {
+      html += "<tr>";
+      row.forEach((c) => { html += "<td>" + c + "</td>"; });
+      html += "</tr>";
+    });
+    return html + "</tbody></table></div>";
+  }
   function keyOf(p) {
     const name = (p.name || "").trim().toLowerCase();
     const num = (p.number || "").trim();
@@ -2386,8 +2711,15 @@
     }
     const row = map.get(key);
     row.g += 1;
+    row.key = key;
+    if (src.rosterId) row.rosterId = src.rosterId;
     if (src.name) row.name = src.name;
     fields.forEach((f) => { row[f] += src[f] || 0; });
+  }
+  function bindProfileLinks(root) {
+    root.querySelectorAll(".name-link").forEach((btn) => {
+      btn.addEventListener("click", () => openProfile(btn.dataset.roster || "", btn.dataset.key || ""));
+    });
   }
   function seasonTable(title, rows, headers, cells) {
     rows.sort((a, b) => (b.ab || b.outs || 0) - (a.ab || a.outs || 0));
@@ -2395,7 +2727,7 @@
     headers.forEach((h) => { html += "<th>" + h + "</th>"; });
     html += "</tr></thead><tbody>";
     rows.forEach((r) => {
-      html += "<tr><td class='who'>" + esc(r.name || "Unnamed") + "</td><td>" + esc(r.number || "") + "</td>";
+      html += "<tr><td class='who'><button type='button' class='name-link' data-roster='" + esc(r.rosterId || "") + "' data-key='" + esc(r.key || "") + "'>" + esc(r.name || "Unnamed") + "</button></td><td>" + esc(r.number || "") + "</td>";
       cells(r).forEach((c) => { html += "<td>" + c + "</td>"; });
       html += "</tr>";
     });
@@ -2407,9 +2739,9 @@
 
   function gameSnapshot() {
     const slimB = (b) => ({
-      id: b.id, name: b.name, number: b.number, pos: b.pos,
+      id: b.id, rosterId: b.rosterId || "", name: b.name, number: b.number, pos: b.pos,
       ab: b.ab, r: b.r, h: b.h, doubles: b.doubles, triples: b.triples, hr: b.hr,
-      rbi: b.rbi, bb: b.bb, so: b.so, hbp: b.hbp, sac: b.sac, sb: b.sb
+      rbi: b.rbi, bb: b.bb, so: b.so, hbp: b.hbp, sac: b.sac, sb: b.sb, cs: b.cs
     });
     return {
       id: state.gameId,
@@ -2421,7 +2753,7 @@
       pomfretHome: !!state.pomfretHome,
       batters: state.lineup.concat(state.played).filter((b) => b.name || b.ab || b.bb || b.hbp || b.r || b.h || b.sac).map(slimB),
       pitchers: state.pitchers.filter((p) => p.name || p.outs || p.h || p.bb || p.so || p.r).map((p) => ({
-        id: p.id, name: p.name, number: p.number, outs: p.outs, h: p.h, r: p.r, er: p.er, bb: p.bb, so: p.so, pitches: p.pitches
+        id: p.id, rosterId: p.rosterId || "", name: p.name, number: p.number, outs: p.outs, h: p.h, r: p.r, er: p.er, bb: p.bb, so: p.so, pitches: p.pitches
       }))
     };
   }
@@ -2630,6 +2962,25 @@
   $("tab-play").addEventListener("click", () => showTab("play"));
   $("tab-roster").addEventListener("click", () => showTab("roster"));
   $("tab-book").addEventListener("click", () => showTab("book"));
+  $("profile-name").addEventListener("input", () => {
+    const guy = findRosterPlayer($("profile").dataset.id || "", $("profile").dataset.key || "");
+    if (!guy) return;
+    guy.name = $("profile-name").value;
+    const btn = document.querySelector("#roster-body tr[data-id='" + guy.id + "'] .roster-name");
+    if (btn) btn.textContent = guy.name.trim();
+    saveRoster();
+    syncRosterIntoGame();
+    persist();
+  });
+  $("profile-name").addEventListener("blur", () => {
+    if ($("profile").hidden) return;
+    rosterChanged();
+  });
+  $("profile-close").addEventListener("click", closeProfile);
+  $("profile").addEventListener("click", (e) => { if (e.target === $("profile")) closeProfile(); });
+  document.addEventListener("keydown", (e) => {
+    if (e.key === "Escape" && !$("profile").hidden) closeProfile();
+  });
   $("pitch-sub").addEventListener("change", () => {
     const menu = $("pitch-sub");
     const id = menu.value;
