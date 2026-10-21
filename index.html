@@ -78,6 +78,7 @@
     width: min(1120px, calc(100% - 28px));
     margin: 0 auto;
     display: flex;
+    flex-wrap: wrap;
     gap: 8px;
     padding: 2px 0 16px;
   }
@@ -99,6 +100,15 @@
     padding: 0 0 18px;
     max-width: 62ch;
     color: rgba(244, 238, 228, 0.88);
+  }
+  .sync-note {
+    width: min(1120px, calc(100% - 28px));
+    margin: -6px auto 0;
+    padding: 0 0 14px;
+    font-size: 13px;
+    font-weight: 700;
+    letter-spacing: 0.04em;
+    color: rgba(244, 238, 228, 0.72);
   }
 
   main { padding: 18px 0 56px; }
@@ -499,6 +509,37 @@
   .slash div { display: flex; flex-direction: column; min-width: 3.2em; }
   .slash b { font-size: 22px; line-height: 1; }
   .slash span { font-size: 11px; letter-spacing: 0.08em; text-transform: uppercase; color: var(--muted); font-weight: 800; }
+  .ranks { display: grid; grid-template-columns: repeat(auto-fill, minmax(250px, 1fr)); gap: 12px; }
+  .rank-card {
+    border: 1px solid var(--black);
+    background: #fff;
+    box-shadow: 4px 4px 0 var(--black);
+    padding: 10px 12px 6px;
+    max-width: 420px;
+  }
+  .rank-card h3 {
+    margin: 0 0 6px;
+    font-size: 13px;
+    letter-spacing: 0.14em;
+    text-transform: uppercase;
+  }
+  .rank-row {
+    display: grid;
+    grid-template-columns: 1.5em minmax(0, 1fr) auto;
+    gap: 8px;
+    align-items: baseline;
+    padding: 5px 0;
+    border-top: 1px solid var(--line);
+    font-variant-numeric: tabular-nums;
+  }
+  .rank-row .place { font-weight: 800; color: var(--muted); }
+  .rank-row .place.lead { color: var(--red); }
+  .rank-row .val { font-weight: 800; }
+  .rank-name { display: flex; gap: 6px; align-items: baseline; min-width: 0; }
+  .rank-name .name-link { overflow: hidden; text-overflow: ellipsis; }
+  .rank-name .num { color: var(--muted); font-size: 12px; font-weight: 800; }
+  .rank-group { margin-top: 16px; }
+  .rank-group .kicker { margin-bottom: 10px; }
 
   @media (max-width: 900px) {
     .meta, .layout, .park-layout, .sched-form { grid-template-columns: 1fr 1fr; }
@@ -548,12 +589,14 @@
     </div>
   </header>
   <div class="lede-wrap">
-    <p class="lede">Take the count, tap the play, and the line score, batting line, and pitching line update with the inning. Everything stays in this browser.</p>
+    <p class="lede">Take the count, tap the play, and the line score, batting line, and pitching line update with the inning. Every phone shares this book.</p>
     <nav class="tabs" role="tablist" aria-label="Scorebook">
       <button type="button" class="tab on" id="tab-play" role="tab" aria-selected="true" aria-controls="view-play">Play</button>
       <button type="button" class="tab" id="tab-roster" role="tab" aria-selected="false" aria-controls="view-roster">Roster</button>
       <button type="button" class="tab" id="tab-book" role="tab" aria-selected="false" aria-controls="view-book">Schedule</button>
+      <button type="button" class="tab" id="tab-ranks" role="tab" aria-selected="false" aria-controls="view-ranks">Rankings</button>
     </nav>
+    <p class="sync-note" id="sync-note">Checking the shared book…</p>
   </div>
 
   <main>
@@ -865,7 +908,38 @@
         </div>
       </section>
     </div>
-    <footer class="note">One file. Open it in any browser. The book is saved on this device until you clear site data.</footer>
+
+    <div id="view-ranks" class="view" hidden>
+      <section class="panel" aria-label="Rankings">
+        <div class="kicker">Rankings</div>
+        <label class="play-pick" id="rank-pick-wrap">
+          <span>Stat</span>
+          <select id="rank-pick" aria-label="Stat">
+            <optgroup label="Batting">
+              <option value="AVG">AVG</option>
+              <option value="OBP">OBP</option>
+              <option value="SLG">SLG</option>
+              <option value="OPS">OPS</option>
+              <option value="Hits">Hits</option>
+              <option value="Home runs">Home runs</option>
+              <option value="RBI">RBI</option>
+              <option value="Runs">Runs</option>
+              <option value="Stolen bases">Stolen bases</option>
+              <option value="Walks">Walks</option>
+            </optgroup>
+            <optgroup label="Pitching">
+              <option value="ERA">ERA</option>
+              <option value="WHIP">WHIP</option>
+              <option value="Strikeouts">Strikeouts</option>
+              <option value="Innings">Innings</option>
+            </optgroup>
+          </select>
+        </label>
+        <p id="ranks-blurb" class="empty">Start scoring and the leaders fill in from this game. Saved games stay in the season line.</p>
+        <div id="ranks-body"></div>
+      </section>
+    </div>
+    <footer class="note">One file. Open it in any browser. Plays, the roster, and the season stay in the shared book, so a new phone picks up where the last one left off.</footer>
   </main>
   <div id="profile" class="profile" hidden>
     <div class="profile-card" role="dialog" aria-modal="true" aria-labelledby="profile-name">
@@ -887,6 +961,8 @@
   const GAME_KEY = "pomfret-griffins-game-v1";
   const SEASON_KEY = "pomfret-griffins-season-v1";
   const ROSTER_KEY = "pomfret-griffins-roster-v1";
+  const CLIENT_KEY = "pomfret-griffins-client";
+  const CLOUD_URL = "https://mantledb.sh/v2/pomfret-griffins-scorebook-b7k2/book";
   const POSITIONS = ["P", "C", "1B", "2B", "3B", "SS", "LF", "CF", "RF", "DH", "EH"];
   const ROSTER_SIZE = 25;
   const REGULATION = 7;
@@ -967,9 +1043,11 @@
   }
   function saveSeason(season) {
     try { localStorage.setItem(SEASON_KEY, JSON.stringify(season)); } catch (e) { /* keep going */ }
+    queueCloud();
   }
   function persist() {
     try { localStorage.setItem(GAME_KEY, JSON.stringify(state)); } catch (e) { /* keep going */ }
+    queueCloud();
   }
   function loadGame() {
     try {
@@ -1023,6 +1101,7 @@
   }
   function saveRoster() {
     try { localStorage.setItem(ROSTER_KEY, JSON.stringify(roster)); } catch (e) { /* keep going */ }
+    queueCloud();
   }
   function rosterLabel(guy) {
     const num = (guy.number || "").trim();
@@ -1629,6 +1708,7 @@
     syncPitchers();
     paintSeason(season);
     paintSchedule(season);
+    paintRankings();
     paintRoster();
     paintPitchMenu();
     if (!$("profile").hidden) paintProfile($("profile").dataset.id || "", $("profile").dataset.key || "");
@@ -2165,6 +2245,99 @@
     bindProfileLinks($("season-bat"));
     bindProfileLinks($("season-pit"));
   }
+  function obpRaw(b) {
+    const den = (b.ab || 0) + (b.bb || 0) + (b.hbp || 0) + (b.sac || 0);
+    if (!den) return null;
+    return ((b.h || 0) + (b.bb || 0) + (b.hbp || 0)) / den;
+  }
+  function slgRaw(b) {
+    if (!b.ab) return null;
+    return totalBases(b) / b.ab;
+  }
+  function seasonLines() {
+    const batters = new Map();
+    const pitchers = new Map();
+    profileGames().forEach((g) => {
+      (g.batters || []).forEach((b) => addTot(batters, keyOf(b), b, ["ab", "r", "h", "doubles", "triples", "hr", "rbi", "bb", "so", "hbp", "sac", "sb"]));
+      (g.pitchers || []).forEach((p) => addTot(pitchers, keyOf(p), p, ["outs", "h", "r", "er", "bb", "so", "pitches"]));
+    });
+    return { batters: [...batters.values()], pitchers: [...pitchers.values()] };
+  }
+  function rankRows(players, valueOf, higher) {
+    const scored = players.map((p) => ({ p, v: valueOf(p) }));
+    scored.sort((a, b) => {
+      if (a.v == null && b.v == null) return (a.p.name || "").localeCompare(b.p.name || "");
+      if (a.v == null) return 1;
+      if (b.v == null) return -1;
+      if (a.v !== b.v) return higher ? b.v - a.v : a.v - b.v;
+      return (a.p.name || "").localeCompare(b.p.name || "");
+    });
+    let place = 0;
+    let last = null;
+    let seen = 0;
+    return scored.map((row) => {
+      seen += 1;
+      if (row.v == null) return { place: null, player: row.p };
+      if (row.v !== last) {
+        place = seen;
+        last = row.v;
+      }
+      return { place, player: row.p };
+    });
+  }
+  function rankCard(title, rows, show) {
+    let html = "<article class='rank-card'><h3>" + esc(title) + "</h3>";
+    rows.forEach((row) => {
+      const p = row.player;
+      const num = (p.number || "").trim();
+      html += "<div class='rank-row'><span class='place" + (row.place === 1 ? " lead" : "") + "'>" + (row.place == null ? "—" : row.place) + "</span>" +
+        "<span class='rank-name'><button type='button' class='name-link' data-roster='" + esc(p.rosterId || "") + "' data-key='" + esc(p.key || "") + "'>" + esc(p.name || "Unnamed") + "</button>" +
+        (num ? "<span class='num'>#" + esc(num) + "</span>" : "") + "</span>" +
+        "<span class='val'>" + esc(show(p)) + "</span></div>";
+    });
+    return html + "</article>";
+  }
+  function rankingBoards(lines) {
+    const obp = (b) => formatRate((b.h || 0) + (b.bb || 0) + (b.hbp || 0), (b.ab || 0) + (b.bb || 0) + (b.hbp || 0) + (b.sac || 0));
+    const board = (players, value, higher, show) => ({ players, value, higher, show });
+    return {
+      AVG: board(lines.batters, (b) => b.ab ? b.h / b.ab : null, true, (b) => formatAvg(b.h, b.ab)),
+      OBP: board(lines.batters, obpRaw, true, obp),
+      SLG: board(lines.batters, slgRaw, true, (b) => formatRate(totalBases(b), b.ab)),
+      OPS: board(lines.batters, (b) => { const o = obpRaw(b); const s = slgRaw(b); return o == null || s == null ? null : o + s; }, true, formatOPS),
+      Hits: board(lines.batters, (b) => b.h || 0, true, (b) => String(b.h || 0)),
+      "Home runs": board(lines.batters, (b) => b.hr || 0, true, (b) => String(b.hr || 0)),
+      RBI: board(lines.batters, (b) => b.rbi || 0, true, (b) => String(b.rbi || 0)),
+      Runs: board(lines.batters, (b) => b.r || 0, true, (b) => String(b.r || 0)),
+      "Stolen bases": board(lines.batters, (b) => b.sb || 0, true, (b) => String(b.sb || 0)),
+      Walks: board(lines.batters, (b) => b.bb || 0, true, (b) => String(b.bb || 0)),
+      ERA: board(lines.pitchers, (p) => p.outs ? (27 * (p.er || 0)) / p.outs : null, false, formatERA),
+      WHIP: board(lines.pitchers, (p) => p.outs ? (((p.h || 0) + (p.bb || 0)) * 3) / p.outs : null, false, formatWHIP),
+      Strikeouts: board(lines.pitchers, (p) => p.so || 0, true, (p) => String(p.so || 0)),
+      Innings: board(lines.pitchers, (p) => p.outs || 0, true, (p) => formatIP(p.outs || 0))
+    };
+  }
+  function paintRankings() {
+    const lines = seasonLines();
+    const body = $("ranks-body");
+    const empty = !lines.batters.length && !lines.pitchers.length;
+    $("ranks-blurb").hidden = !empty;
+    $("rank-pick-wrap").hidden = empty;
+    if (empty) {
+      body.innerHTML = "";
+      return;
+    }
+    const boards = rankingBoards(lines);
+    const pick = $("rank-pick");
+    const chosen = boards[pick.value] ? pick.value : "AVG";
+    if (pick.value !== chosen) pick.value = chosen;
+    const board = boards[chosen];
+    const rows = rankRows(board.players, board.value, board.higher).filter((row) => row.place != null).slice(0, 5);
+    body.innerHTML = rows.length
+      ? rankCard(chosen, rows, board.show)
+      : "<p class='empty'>Nobody qualifies for this one yet.</p>";
+    bindProfileLinks(body);
+  }
   function formatDate(iso) {
     if (!iso) return "—";
     const parts = iso.split("-").map(Number);
@@ -2287,7 +2460,7 @@
     });
   }
   function showTab(name) {
-    ["play", "roster", "book"].forEach((id) => {
+    ["play", "roster", "book", "ranks"].forEach((id) => {
       const on = name === id;
       $("view-" + id).hidden = !on;
       $("tab-" + id).classList.toggle("on", on);
@@ -2962,6 +3135,8 @@
   $("tab-play").addEventListener("click", () => showTab("play"));
   $("tab-roster").addEventListener("click", () => showTab("roster"));
   $("tab-book").addEventListener("click", () => showTab("book"));
+  $("tab-ranks").addEventListener("click", () => showTab("ranks"));
+  $("rank-pick").addEventListener("change", paintRankings);
   $("profile-name").addEventListener("input", () => {
     const guy = findRosterPlayer($("profile").dataset.id || "", $("profile").dataset.key || "");
     if (!guy) return;
@@ -3037,6 +3212,170 @@
     }
   });
 
+  let syncReady = false;
+  let applyingRemote = false;
+  let localDirty = false;
+  let dirtyAt = 0;
+  let cloudRev = 0;
+  let pushTimer = 0;
+  let syncing = false;
+
+  function clientId() {
+    try {
+      let id = localStorage.getItem(CLIENT_KEY);
+      if (!id) {
+        id = "c" + Math.random().toString(36).slice(2) + Date.now().toString(36);
+        localStorage.setItem(CLIENT_KEY, id);
+      }
+      return id;
+    } catch (e) {
+      return "c-local";
+    }
+  }
+  function setSync(text) {
+    const note = $("sync-note");
+    if (note) note.textContent = text;
+  }
+  function validBook(data) {
+    return !!(data && data.game && Array.isArray(data.game.lineup) && data.game.lineup.length && Array.isArray(data.roster));
+  }
+  function bookScore(book) {
+    if (!validBook(book)) return -1;
+    const game = book.game;
+    const log = (game.log || []).length;
+    const games = book.season && Array.isArray(book.season.games) ? book.season.games.length : 0;
+    const names = book.roster.filter((r) => (r.name || "").trim()).length;
+    const marks = (game.balls || 0) + (game.strikes || 0) + (game.outs || 0) + (game.inning || 1);
+    return games * 100000 + log * 100 + names * 10 + marks;
+  }
+  function currentBook() {
+    return { rev: cloudRev, updated: 0, writer: clientId(), game: state, season: loadSeason(), roster: roster };
+  }
+  function settleLoaded() {
+    if (!state.started && hasActivity(state)) state.started = true;
+    if (!state.started) state.battingIndex = 0;
+    if (!Array.isArray(state.oppLineup) || state.oppLineup.length < 9) {
+      state.oppLineup = makeOppLineup(state);
+      state.oppBattingIndex = 0;
+    }
+    if (state.oppBattingIndex == null) state.oppBattingIndex = 0;
+    if (state.final == null) state.final = false;
+  }
+  function queueCloud() {
+    if (!syncReady || applyingRemote) return;
+    localDirty = true;
+    dirtyAt = Date.now();
+    setSync("Saving to the shared book…");
+    clearTimeout(pushTimer);
+    pushTimer = setTimeout(pushBook, 700);
+  }
+  function applyBook(book) {
+    applyingRemote = true;
+    cloudRev = book.rev || 0;
+    state = book.game;
+    roster = normalizeRoster(book.roster);
+    if (book.season && Array.isArray(book.season.games)) saveSeason(book.season);
+    linkGameToRoster();
+    settleLoaded();
+    saveRoster();
+    persist();
+    undoStack.length = 0;
+    applyingRemote = false;
+    localDirty = false;
+    paint();
+    setSync("Shared with every phone");
+  }
+  async function fetchCloud() {
+    const res = await fetch(CLOUD_URL, { cache: "no-store" });
+    if (!res.ok) return null;
+    const data = await res.json();
+    return validBook(data) ? data : null;
+  }
+  async function fetchFileBook() {
+    try {
+      const res = await fetch("book.json?t=" + Date.now(), { cache: "no-store" });
+      if (!res.ok) return null;
+      const data = await res.json();
+      return validBook(data) ? data : null;
+    } catch (e) {
+      return null;
+    }
+  }
+  async function pushBook() {
+    if (!localDirty || syncing) return;
+    const stamp = dirtyAt;
+    syncing = true;
+    try {
+      let remote = null;
+      try { remote = await fetchCloud(); } catch (e) { remote = null; }
+      const mine = currentBook();
+      if (remote && remote.writer !== clientId() && (remote.rev || 0) > cloudRev && bookScore(remote) > bookScore(mine) && (remote.updated || 0) > stamp) {
+        applyBook(remote);
+        return;
+      }
+      const body = currentBook();
+      body.rev = Math.max(cloudRev, remote && remote.rev || 0) + 1;
+      body.updated = Date.now();
+      body.writer = clientId();
+      const res = await fetch(CLOUD_URL, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(body)
+      });
+      if (!res.ok) throw new Error("save");
+      cloudRev = body.rev;
+      if (dirtyAt === stamp) {
+        localDirty = false;
+        setSync("Shared with every phone");
+      } else {
+        queueCloud();
+      }
+    } catch (e) {
+      setSync("This phone can't reach the shared book yet");
+    } finally {
+      syncing = false;
+    }
+  }
+  async function pullBook() {
+    if (!syncReady || syncing || localDirty) return;
+    const field = document.activeElement;
+    if (field && /^(input|textarea|select)$/i.test(field.tagName)) return;
+    try {
+      const remote = await fetchCloud();
+      if (!remote || (remote.rev || 0) <= cloudRev) return;
+      applyBook(remote);
+    } catch (e) {
+      setSync("This phone can't reach the shared book yet");
+    }
+  }
+  async function syncStart() {
+    const local = currentBook();
+    let remote = null;
+    try { remote = await fetchCloud(); } catch (e) { remote = null; }
+    if (!remote) remote = await fetchFileBook();
+    const fromFile = remote && !remote.rev;
+    if (remote && bookScore(remote) > bookScore(local)) applyBook(remote);
+    syncReady = true;
+    if (!remote || bookScore(currentBook()) > bookScore(remote) || fromFile) {
+      if (bookScore(currentBook()) > 0) {
+        localDirty = true;
+        dirtyAt = Date.now();
+        await pushBook();
+      } else {
+        setSync(remote ? "Shared with every phone" : "Shared book is ready");
+      }
+    } else {
+      setSync("Shared with every phone");
+    }
+    setInterval(() => {
+      if (localDirty) pushBook();
+      else pullBook();
+    }, 5000);
+    document.addEventListener("visibilitychange", () => {
+      if (!document.hidden) pullBook();
+    });
+  }
+
   state = loadGame();
   roster = loadRoster();
   if (!roster) {
@@ -3045,16 +3384,10 @@
   } else {
     linkGameToRoster();
   }
-  if (!state.started && hasActivity(state)) state.started = true;
-  if (!state.started) state.battingIndex = 0;
-  if (!Array.isArray(state.oppLineup) || state.oppLineup.length < 9) {
-    state.oppLineup = makeOppLineup(state);
-    state.oppBattingIndex = 0;
-  }
-  if (state.oppBattingIndex == null) state.oppBattingIndex = 0;
-  if (state.final == null) state.final = false;
+  settleLoaded();
   persist();
   paint();
+  syncStart();
 })();
 </script>
 </body>

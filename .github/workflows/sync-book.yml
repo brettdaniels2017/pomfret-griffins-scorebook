@@ -1,0 +1,41 @@
+name: Save shared scorebook
+
+on:
+  schedule:
+    - cron: "17 * * * *"
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+jobs:
+  save:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Copy the shared book into the repo
+        run: |
+          curl -fsS "https://mantledb.sh/v2/pomfret-griffins-scorebook-b7k2/book" -o book.next.json
+          python3 - << 'PY'
+          import json, shutil, sys
+          try:
+              data = json.load(open("book.next.json"))
+          except Exception:
+              sys.exit(0)
+          game = data.get("game") if isinstance(data, dict) else None
+          roster = data.get("roster") if isinstance(data, dict) else None
+          if not isinstance(game, dict) or not isinstance(game.get("lineup"), list) or not game["lineup"]:
+              sys.exit(0)
+          if not isinstance(roster, list):
+              sys.exit(0)
+          shutil.move("book.next.json", "book.json")
+          PY
+          if [ ! -f book.json ]; then
+            exit 0
+          fi
+          if git diff --quiet -- book.json && git ls-files --error-unmatch book.json >/dev/null 2>&1; then
+            exit 0
+          fi
+          git add book.json
+          git -c user.name="github-actions[bot]" -c user.email="41898282+github-actions[bot]@users.noreply.github.com" commit -m "Update the shared scorebook."
+          git push
