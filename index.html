@@ -207,11 +207,11 @@
   }
   .park-layout {
     display: grid;
-    grid-template-columns: minmax(180px, 230px) minmax(0, 1fr);
+    grid-template-columns: minmax(220px, 280px) minmax(0, 1fr);
     gap: 16px;
     align-items: start;
   }
-  .park-card .who-name { font-size: clamp(28px, 3vw, 40px); }
+  .park-card .play-menus { margin: 0; }
   .park-scroll { overflow-x: auto; }
   .park {
     position: relative;
@@ -313,12 +313,6 @@
   .slot-b2 { left: 50%; top: 64.4%; }
   .slot-b1 { left: 60%; top: 74.5%; }
   .slot-b3 { left: 40%; top: 74.5%; }
-  .who { font-size: 12px; font-weight: 800; letter-spacing: 0.16em; text-transform: uppercase; color: var(--red-deep); }
-  .who-name { font-size: clamp(28px, 4vw, 40px); line-height: 0.95; text-transform: uppercase; font-weight: 800; }
-  .who-meta { color: var(--muted); font-weight: 700; margin-top: 4px; }
-  .slash { display: flex; gap: 14px; margin-top: 8px; font-variant-numeric: tabular-nums; }
-  .slash b { display: block; font-size: 20px; }
-  .slash span { font-size: 11px; letter-spacing: 0.12em; font-weight: 800; color: var(--muted); }
   .count {
     display: grid;
     grid-template-columns: repeat(3, 1fr);
@@ -358,6 +352,59 @@
   .pad { display: grid; gap: 8px; }
   .g3 { grid-template-columns: repeat(3, 1fr); }
   .pad button { min-height: 48px; }
+  .play-menus { display: grid; gap: 8px; margin: 2px 0 12px; }
+  .play-menus .play-pick { position: relative; margin: 0; }
+  .play-face {
+    position: relative;
+    width: 100%;
+    min-height: 48px;
+    border: 1px solid var(--black);
+    background: #fff;
+    padding: 8px 36px 8px 10px;
+    text-align: left;
+    font-weight: 800;
+    letter-spacing: 0.04em;
+    text-transform: uppercase;
+  }
+  .play-face::after {
+    content: "";
+    position: absolute;
+    right: 14px;
+    top: 50%;
+    width: 12px;
+    height: 8px;
+    margin-top: -4px;
+    background: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 12 8'%3E%3Cpath fill='%23120d0c' d='M1 1l5 5 5-5'/%3E%3C/svg%3E") center / 12px 8px no-repeat;
+  }
+  .play-face[aria-expanded="true"]::after { transform: rotate(180deg); }
+  .play-face:disabled { opacity: 0.45; cursor: not-allowed; }
+  .play-list {
+    margin: -1px 0 0;
+    background: #fff;
+    border: 1px solid var(--black);
+    max-height: 240px;
+    overflow: auto;
+  }
+  .play-list[hidden] { display: none; }
+  .play-list button {
+    display: block;
+    width: 100%;
+    min-height: 44px;
+    border: 0;
+    border-bottom: 1px solid var(--line);
+    background: #fff;
+    padding: 10px 12px;
+    text-align: left;
+    font-weight: 800;
+    letter-spacing: 0.04em;
+    text-transform: uppercase;
+  }
+  .play-list button:last-child { border-bottom: 0; }
+  .play-list button:disabled {
+    color: #8a8178;
+    background: #e4ddd4;
+    cursor: default;
+  }
   .play-pick { display: flex; flex-direction: column; gap: 4px; margin: 2px 0 12px; }
   .play-pick span { font-size: 11px; font-weight: 800; letter-spacing: 0.14em; text-transform: uppercase; color: var(--muted); }
   .play-pick select {
@@ -383,7 +430,29 @@
   #chooser[hidden] { display: none; }
   #chooser strong { letter-spacing: 0.08em; text-transform: uppercase; font-size: 13px; }
 
+  .log-toggle {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    width: 100%;
+    margin: 16px 0 10px;
+    padding: 0;
+    border: 0;
+    background: transparent;
+    text-align: left;
+  }
+  .log-toggle .kicker { margin: 0; }
+  .log-toggle::after {
+    content: "";
+    width: 12px;
+    height: 8px;
+    flex: 0 0 12px;
+    margin-left: 12px;
+    background: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 12 8'%3E%3Cpath fill='%23120d0c' d='M1 1l5 5 5-5'/%3E%3C/svg%3E") center / 12px 8px no-repeat;
+  }
+  .log-toggle[aria-expanded="true"]::after { transform: rotate(180deg); }
   .log { list-style: none; margin: 0; padding: 0; max-height: 240px; overflow: auto; }
+  .log[hidden] { display: none; }
   .log li { padding: 7px 0; border-bottom: 1px solid var(--line); font-variant-numeric: tabular-nums; }
   .log li:first-child { font-weight: 800; }
   .empty { color: var(--muted); font-weight: 700; }
@@ -429,7 +498,7 @@
   .roster-table td.name { text-align: left; }
   .roster-table td.name input { width: 14rem; }
   .sub-pick { min-width: 8.5rem; }
-  .pad button:disabled, #play-menu:disabled { opacity: 0.45; cursor: not-allowed; }
+  .pad button:disabled { opacity: 0.45; cursor: not-allowed; }
 
   #toast {
     position: fixed;
@@ -542,16 +611,20 @@
   .rank-group .kicker { margin-bottom: 10px; }
 
   @media (max-width: 900px) {
-    .meta, .layout, .park-layout, .sched-form { grid-template-columns: 1fr 1fr; }
+    .meta, .layout, .sched-form { grid-template-columns: 1fr 1fr; }
   }
   @media (max-width: 560px) {
     .top-inner { gap: 12px; }
     .crest { width: 62px; height: 62px; }
     .count { gap: 6px; }
+    .park-layout { grid-template-columns: 1fr; }
     .lamp strong { font-size: 28px; }
   }
   @media print {
-    .band, .toolbar, .pad, .group, .play-pick, .switch, #chooser, .rowbtns, #toast, .lede-wrap, .tabs, .sched-form, .profile { display: none !important; }
+    .band, .toolbar, .pad, .group, .play-pick, .park-card, .switch, #chooser, .rowbtns, #toast, .lede-wrap, .tabs, .sched-form, .profile { display: none !important; }
+    .park-layout { grid-template-columns: 1fr !important; }
+    .log-toggle::after { display: none; }
+    #log { display: block !important; }
     .view, .view[hidden] { display: block !important; }
     body { background: white; }
     .panel { box-shadow: none; }
@@ -643,11 +716,54 @@
       <div class="kicker">Field</div>
       <div class="park-layout">
         <aside class="park-card">
-          <div class="who" id="who-role">Now batting</div>
-          <div class="who-name" id="who-name">Batter 1</div>
-          <div class="who-meta" id="who-meta"></div>
-          <div class="slash" id="who-slash"></div>
-          <div class="mound" id="mound"></div>
+          <div class="play-menus">
+            <div class="play-pick">
+              <button type="button" class="play-face" aria-haspopup="listbox" aria-expanded="false" aria-controls="plays-hits">Hits</button>
+              <div class="play-list" id="plays-hits" role="listbox" hidden>
+                <button type="button" data-act="hit" data-n="1">Single</button>
+                <button type="button" data-act="hit" data-n="2">Double</button>
+                <button type="button" data-act="hit" data-n="3">Triple</button>
+                <button type="button" data-act="hit" data-n="4">Home run</button>
+              </div>
+            </div>
+            <div class="play-pick">
+              <button type="button" class="play-face" aria-haspopup="listbox" aria-expanded="false" aria-controls="plays-onbase">On base</button>
+              <div class="play-list" id="plays-onbase" role="listbox" hidden>
+                <button type="button" data-act="walk">Walk</button>
+                <button type="button" data-act="hbp">Hit by pitch</button>
+                <button type="button" data-act="error">On error</button>
+                <button type="button" data-act="fc">Fielder's choice</button>
+              </div>
+            </div>
+            <div class="play-pick">
+              <button type="button" class="play-face" aria-haspopup="listbox" aria-expanded="false" aria-controls="plays-outs">Outs</button>
+              <div class="play-list" id="plays-outs" role="listbox" hidden>
+                <button type="button" data-act="k">Strikeout</button>
+                <button type="button" data-act="out" data-kind="grounded out">Groundout</button>
+                <button type="button" data-act="out" data-kind="flew out">Flyout</button>
+                <button type="button" data-act="out" data-kind="lined out">Lineout</button>
+                <button type="button" data-act="out" data-kind="popped out">Popup</button>
+                <button type="button" data-act="sac">Sacrifice</button>
+                <button type="button" data-act="dp">Double play</button>
+                <button type="button" data-act="manual-out">Manual out</button>
+              </div>
+            </div>
+            <div class="play-pick">
+              <button type="button" class="play-face" aria-haspopup="listbox" aria-expanded="false" aria-controls="plays-runners">Runners</button>
+              <div class="play-list" id="plays-runners" role="listbox" hidden>
+                <button type="button" data-act="sb">Stolen base</button>
+                <button type="button" data-act="cs">Caught stealing</button>
+                <button type="button" data-act="wp">Wild pitch</button>
+                <button type="button" data-act="eadv">Error, advance</button>
+                <button type="button" data-act="run">Score a run</button>
+                <button type="button" data-act="clear-bases">Clear bases</button>
+              </div>
+            </div>
+          </div>
+          <div id="chooser" hidden>
+            <strong id="chooser-label"></strong>
+            <span id="chooser-options"></span>
+          </div>
         </aside>
         <div class="park-scroll">
           <div class="park" id="diamond">
@@ -732,50 +848,12 @@
             <button type="button" data-act="foul">Foul</button>
           </div>
         </div>
-        <label class="play-pick">
-          <span>Play</span>
-          <select id="play-menu" aria-label="Play">
-            <option value="">Choose a play</option>
-            <optgroup label="Hits">
-              <option value="hit" data-n="1">Single</option>
-              <option value="hit" data-n="2">Double</option>
-              <option value="hit" data-n="3">Triple</option>
-              <option value="hit" data-n="4">Home run</option>
-            </optgroup>
-            <optgroup label="On base">
-              <option value="walk">Walk</option>
-              <option value="hbp">Hit by pitch</option>
-              <option value="error">On error</option>
-              <option value="fc">Fielder's choice</option>
-            </optgroup>
-            <optgroup label="Outs">
-              <option value="k">Strikeout</option>
-              <option value="out" data-kind="grounded out">Groundout</option>
-              <option value="out" data-kind="flew out">Flyout</option>
-              <option value="out" data-kind="lined out">Lineout</option>
-              <option value="out" data-kind="popped out">Popup</option>
-              <option value="sac">Sacrifice</option>
-              <option value="dp">Double play</option>
-              <option value="manual-out">Manual out</option>
-            </optgroup>
-            <optgroup label="Runners">
-              <option value="sb">Stolen base</option>
-              <option value="cs">Caught stealing</option>
-              <option value="wp">Wild pitch</option>
-              <option value="eadv">Error, advance</option>
-              <option value="run">Score a run</option>
-              <option value="clear-bases">Clear bases</option>
-            </optgroup>
-          </select>
-        </label>
         <label class="switch"><input type="checkbox" id="advance"> Advance runners on outs</label>
-        <div id="chooser" hidden>
-          <strong id="chooser-label"></strong>
-          <span id="chooser-options"></span>
-        </div>
 
-        <div class="kicker" style="margin-top:16px">Play log</div>
-        <ol class="log" id="log" reversed></ol>
+        <button type="button" class="log-toggle" id="log-toggle" aria-expanded="false" aria-controls="log">
+          <span class="kicker">Play log</span>
+        </button>
+        <ol class="log" id="log" reversed hidden></ol>
       </section>
 
       <div>
@@ -1611,6 +1689,27 @@
     }
   };
 
+  function playReady(act) {
+    const runner = state.bases.some(Boolean);
+    const onFirst = state.bases[0] != null;
+    const onThird = state.bases[2] != null;
+    const room = state.outs < 2;
+    if (act === "fc") return onFirst;
+    if (act === "sac" || act === "dp") return runner && room;
+    if (act === "sb" || act === "cs") return stealTargets().length > 0;
+    if (act === "wp" || act === "eadv" || act === "clear-bases") return runner;
+    if (act === "run") return onThird;
+    return true;
+  }
+  function closePlayMenus() {
+    document.querySelectorAll(".play-list").forEach((list) => { list.hidden = true; });
+    document.querySelectorAll(".play-face").forEach((face) => face.setAttribute("aria-expanded", "false"));
+  }
+  function refreshPlayMenus() {
+    const live = gameStarted() && !state.final;
+    document.querySelectorAll(".play-face").forEach((face) => { face.disabled = !live; });
+    document.querySelectorAll(".play-list button").forEach((btn) => { btn.disabled = !live || !playReady(btn.dataset.act); });
+  }
   function stealTargets() {
     const opts = [];
     if (state.bases[0] && !state.bases[1]) opts.push({ from: 0, label: "2nd" });
@@ -1690,7 +1789,7 @@
     $("lineup-pick-head").textContent = locked ? "Sub" : "Lineup";
     $("pitch-label").textContent = locked ? "Pitcher" : "Starter";
     document.querySelectorAll(".pad button").forEach((btn) => { btn.disabled = !live; });
-    $("play-menu").disabled = !live;
+    refreshPlayMenus();
     $("add-batter").hidden = locked || !showingPomfret();
     $("side-away").disabled = locked;
     $("side-home").disabled = locked;
@@ -1746,22 +1845,7 @@
   function paintSpot() {
     const ours = showingPomfret();
     const b = ours ? currentBatter() : currentOppBatter();
-    const spot = ours ? state.battingIndex : (state.oppBattingIndex || 0);
-    const pit = currentPitcher();
-    $("who-role").textContent = state.final ? "Final" : "Now batting";
-    if (b) {
-      $("who-name").textContent = playerLabel(b, spot);
-      $("who-meta").textContent = halfLabel() + " · " + (ours ? ((b.pos || "—") + " · " + oppName()) : oppName());
-      const singles = b.h - b.doubles - b.triples - b.hr;
-      const tb = singles + 2 * b.doubles + 3 * b.triples + 4 * b.hr;
-      $("who-slash").innerHTML =
-        statBit(formatAvg(b.h, b.ab), "AVG") +
-        statBit(formatRate(b.h + b.bb + b.hbp, b.ab + b.bb + b.hbp + b.sac), "OBP") +
-        statBit(formatRate(tb, b.ab), "SLG");
-    }
-    paintField(pomfretBatting(), ours ? b : currentBatter(), pit);
-    const pname = ((pit.name || "").trim() || "Pitcher");
-    $("mound").innerHTML = "<div class='who-meta'>Pitching " + pname + " · " + formatIP(pit.outs) + " IP</div>";
+    paintField(pomfretBatting(), ours ? b : currentBatter(), currentPitcher());
   }
   function shortName(p) {
     const name = (p.name || "").trim();
@@ -1780,9 +1864,21 @@
     el.classList.toggle("is-up", !!opts.up);
     el.title = opts.title || "";
   }
-  function paintField(ours, batter, pit) {
+  function paintField(pomfretUp, batter, pit) {
+    const posNum = { P: "1", C: "2", "1B": "3", "2B": "4", "3B": "5", SS: "6", LF: "7", CF: "8", RF: "9" };
+    const homeBatting = state.started && state.half === "bottom";
+    const numbersOnly = homeBatting || (state.started && pomfretUp);
     ["CF", "LF", "RF", "SS", "2B", "3B", "1B", "P", "C"].forEach((pos) => {
       const el = $("pos-" + pos);
+      if (numbersOnly) {
+        paintSlot(el, {
+          num: posNum[pos],
+          name: "",
+          filled: true,
+          title: "Position " + posNum[pos]
+        });
+        return;
+      }
       let person = state.lineup.find((p) => p.pos === pos) || null;
       if (pos === "P" && ((pit.name || "").trim() || (pit.number || "").trim())) {
         person = pit;
@@ -1793,7 +1889,7 @@
         num: num,
         name: named ? (shortName(person) || pos) : "",
         filled: !!named,
-        up: !!(ours && batter && batter.pos === pos),
+        up: !!(pomfretUp && batter && batter.pos === pos),
         title: named
           ? pos + " · " + ((person.number ? "#" + person.number + " " : "") + ((person.name || "").trim() || pos))
           : pos
@@ -1822,7 +1918,7 @@
       }
     });
     const ab = $("pos-AB");
-    const oppUp = state.started && !ours;
+    const oppUp = state.started && !pomfretUp;
     const up = oppUp ? currentOppBatter() : batter;
     const upIndex = oppUp ? (state.oppBattingIndex || 0) : state.battingIndex;
     if (up) {
@@ -3114,29 +3210,38 @@
   }
 
   document.body.addEventListener("click", (e) => {
+    const face = e.target.closest(".play-face");
+    if (face) {
+      const list = document.getElementById(face.getAttribute("aria-controls"));
+      const willOpen = list.hidden;
+      closePlayMenus();
+      if (willOpen && !face.disabled) {
+        list.hidden = false;
+        face.setAttribute("aria-expanded", "true");
+      }
+      return;
+    }
+    if (!e.target.closest(".play-menus")) closePlayMenus();
     const btn = e.target.closest("[data-act]");
-    if (!btn) return;
+    if (!btn || btn.disabled) return;
+    if (!playReady(btn.dataset.act)) return;
     if (!state.started) { toast("Start the game first"); return; }
     if (state.final) { toast("Game's over"); return; }
+    if (btn.closest(".play-list")) closePlayMenus();
     const fn = actions[btn.dataset.act];
     if (fn) fn(btn);
-  });
-  $("play-menu").addEventListener("change", () => {
-    const menu = $("play-menu");
-    const opt = menu.selectedOptions[0];
-    const act = opt && opt.value;
-    menu.value = "";
-    if (!act) return;
-    if (!state.started) { toast("Start the game first"); return; }
-    if (state.final) { toast("Game's over"); return; }
-    const fn = actions[act];
-    if (fn) fn({ dataset: { n: opt.dataset.n || "", kind: opt.dataset.kind || "" } });
   });
   $("tab-play").addEventListener("click", () => showTab("play"));
   $("tab-roster").addEventListener("click", () => showTab("roster"));
   $("tab-book").addEventListener("click", () => showTab("book"));
   $("tab-ranks").addEventListener("click", () => showTab("ranks"));
   $("rank-pick").addEventListener("change", paintRankings);
+  $("log-toggle").addEventListener("click", () => {
+    const list = $("log");
+    const open = list.hidden;
+    list.hidden = !open;
+    $("log-toggle").setAttribute("aria-expanded", open ? "true" : "false");
+  });
   $("profile-name").addEventListener("input", () => {
     const guy = findRosterPlayer($("profile").dataset.id || "", $("profile").dataset.key || "");
     if (!guy) return;
@@ -3154,7 +3259,10 @@
   $("profile-close").addEventListener("click", closeProfile);
   $("profile").addEventListener("click", (e) => { if (e.target === $("profile")) closeProfile(); });
   document.addEventListener("keydown", (e) => {
-    if (e.key === "Escape" && !$("profile").hidden) closeProfile();
+    if (e.key === "Escape") {
+      closePlayMenus();
+      if (!$("profile").hidden) closeProfile();
+    }
   });
   $("pitch-sub").addEventListener("change", () => {
     const menu = $("pitch-sub");
