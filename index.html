@@ -174,6 +174,27 @@
   .btn.danger, .pad button.hr { background: var(--red); color: white; border-color: var(--red-deep); }
   .btn.ghost, .mini { background: transparent; }
   .btn:active, .pad button:active, .mini:active { transform: translateY(1px); }
+  .btn:disabled, .mini:disabled, select:disabled, input:disabled, textarea:disabled { opacity: 0.45; cursor: not-allowed; }
+  body.watching .group,
+  body.watching .switch,
+  body.watching .park-card,
+  body.watching #chooser,
+  body.watching #side,
+  body.watching #start-game,
+  body.watching #new-game,
+  body.watching #undo,
+  body.watching #save-season,
+  body.watching #restore,
+  body.watching #add-batter,
+  body.watching #pitch-sub,
+  body.watching label.play-pick:has(#pitch-sub),
+  body.watching .sched-form,
+  body.watching .league-form,
+  body.watching .mini,
+  body.watching .sub-pick,
+  body.watching #lineup-pick-head,
+  body.watching td:has(.sub-pick) { display: none !important; }
+  body.watching .park-layout { grid-template-columns: 1fr; }
 
   .board { padding: 0; overflow: hidden; }
   .board .kicker { margin: 14px 14px 0; }
@@ -492,6 +513,13 @@
   .slate td.act { text-align: right; }
   .slate .muted { color: var(--muted); font-weight: 700; }
   .record { font-weight: 800; letter-spacing: 0.06em; margin: 0 0 10px; }
+  .league-form { display: flex; flex-wrap: wrap; gap: 10px; align-items: end; margin-bottom: 14px; }
+  .league-form .field { min-width: 220px; flex: 1; }
+  .league td.ord, .league th.ord, .league td.who, .league th.who { text-align: left; }
+  .league td.num, .league th.num { text-align: center; }
+  .league input.num { width: 3rem; text-align: center; }
+  .league tr.ours td.who { color: var(--red); font-weight: 800; }
+  .league td.lead { color: var(--red); }
 
   footer.note { color: var(--muted); font-size: 14px; margin-top: 8px; }
   .roster-table { min-width: 520px; }
@@ -620,8 +648,52 @@
     .park-layout { grid-template-columns: 1fr; }
     .lamp strong { font-size: 28px; }
   }
+  .gate {
+    position: fixed;
+    inset: 0;
+    z-index: 30;
+    display: grid;
+    place-items: center;
+    padding: 24px;
+    background:
+      radial-gradient(circle at 1px 1px, rgba(18, 13, 12, 0.045) 1px, transparent 0) 0 0 / 14px 14px,
+      var(--cream);
+  }
+  .gate[hidden] { display: none !important; }
+  .gate-card {
+    width: min(420px, 100%);
+    background: var(--paper);
+    border: 1px solid var(--black);
+    box-shadow: var(--shadow);
+    padding: 22px 22px 18px;
+  }
+  .gate-card .crest { width: 64px; height: 64px; display: block; margin-bottom: 10px; }
+  .gate-card h2 {
+    margin: 2px 0 8px;
+    font-size: 46px;
+    line-height: 0.9;
+    letter-spacing: 0.04em;
+    text-transform: uppercase;
+  }
+  .gate-card .eyebrow { color: var(--red); }
+  .gate-card > p, .gate-card .gate-copy { margin: 0 0 14px; }
+  .gate-card .field { margin-bottom: 10px; }
+  .gate-card input { background: white; }
+  .gate-actions { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 4px; }
+  .gate-error { margin: 0 0 10px; color: var(--red); font-weight: 800; }
+  #watch-leave {
+    background: none;
+    border: 0;
+    color: inherit;
+    font: inherit;
+    font-weight: 800;
+    text-decoration: underline;
+    text-underline-offset: 2px;
+    padding: 0 0 0 4px;
+    cursor: pointer;
+  }
   @media print {
-    .band, .toolbar, .pad, .group, .play-pick, .park-card, .switch, #chooser, .rowbtns, #toast, .lede-wrap, .tabs, .sched-form, .profile { display: none !important; }
+    .band, .toolbar, .pad, .group, .play-pick, .park-card, .switch, #chooser, .rowbtns, #toast, .lede-wrap, .tabs, .sched-form, .league-form, .profile, .gate { display: none !important; }
     .park-layout { grid-template-columns: 1fr !important; }
     .log-toggle::after { display: none; }
     #log { display: block !important; }
@@ -636,6 +708,39 @@
 </style>
 </head>
 <body>
+  <div id="gate" class="gate">
+    <form id="gate-form" class="gate-card">
+      <svg class="crest" viewBox="0 0 80 80" role="img" aria-label="Pomfret Griffins">
+        <circle cx="40" cy="40" r="38" fill="#f4eee4"/>
+        <circle cx="40" cy="40" r="34" fill="#120d0c"/>
+        <circle cx="40" cy="40" r="31.2" fill="none" stroke="#d0122d" stroke-width="1.8"/>
+        <path fill="#d0122d" d="M15 48c8-12 16-18 24-18-8 7-13 15-15 26-4-1-7-4-9-8z"/>
+        <path fill="#d0122d" d="M14 57c9-1 17-8 22-17-3 10-9 17-18 21-2-1-4-2-4-4z"/>
+        <path fill="#f4eee4" d="M28 58c3-16 14-28 30-29-4 9-12 16-18 23-3 8-7 13-12 16v-10z"/>
+        <path fill="#f4eee4" d="M50 31c5-7 13-10 17-8 1 5 4 8 4 8 5 1 9 5 9 9-7 1-13-1-17-5-5 4-9 5-14 7 1-5 1-8 1-11z"/>
+        <path fill="#f4eee4" d="M60 20c2-8 7-11 9-8-3 4-5 9-5 13-2-1-4-3-4-5z"/>
+        <path fill="#d0122d" d="M74 33c5 0 8 2 10 4-6 2-11 1-13-1 0-2 1-3 3-3z"/>
+        <path fill="#f4eee4" d="M72 39c6 2 10 4 12 6-7 2-13 0-15-2 0-2 1-3 3-4z"/>
+        <circle cx="64" cy="33.5" r="2.3" fill="#120d0c"/>
+        <circle cx="64.8" cy="32.8" r="0.75" fill="#f4eee4"/>
+        <path fill="#d0122d" d="M30 60c8 2 10 8 8 14-7-3-12-8-10-14h2z"/>
+      </svg>
+      <div class="eyebrow">Pomfret baseball</div>
+      <h2>Griffins</h2>
+      <p class="gate-copy">Sign in to keep the book. Watching leaves the game as it is and follows the scorekeeper's plays.</p>
+      <label class="field">Username
+        <input id="gate-user" autocomplete="username" maxlength="40" required>
+      </label>
+      <label class="field">Password
+        <input id="gate-pass" type="password" autocomplete="current-password" maxlength="80" required>
+      </label>
+      <p id="gate-error" class="gate-error" hidden>That username or password is wrong.</p>
+      <div class="gate-actions">
+        <button type="submit" class="btn primary">Sign in</button>
+        <button type="button" class="btn ghost" id="gate-watch">Watch as spectator</button>
+      </div>
+    </form>
+  </div>
   <div class="band"></div>
   <header class="top">
     <div class="top-inner">
@@ -667,9 +772,11 @@
       <button type="button" class="tab on" id="tab-play" role="tab" aria-selected="true" aria-controls="view-play">Play</button>
       <button type="button" class="tab" id="tab-roster" role="tab" aria-selected="false" aria-controls="view-roster">Roster</button>
       <button type="button" class="tab" id="tab-book" role="tab" aria-selected="false" aria-controls="view-book">Schedule</button>
-      <button type="button" class="tab" id="tab-ranks" role="tab" aria-selected="false" aria-controls="view-ranks">Rankings</button>
+      <button type="button" class="tab" id="tab-ranks" role="tab" aria-selected="false" aria-controls="view-ranks">Team Stats</button>
+      <button type="button" class="tab" id="tab-league" role="tab" aria-selected="false" aria-controls="view-league">League Ranking</button>
     </nav>
     <p class="sync-note" id="sync-note">Checking the shared book…</p>
+    <p class="sync-note" id="watch-note" hidden>Watching the live game. You can look, and the score updates when the scorekeeper enters a play. <button type="button" id="watch-leave">Sign in</button></p>
   </div>
 
   <main>
@@ -701,6 +808,7 @@
         <button type="button" class="btn danger" id="save-season">Save to season</button>
         <button type="button" class="btn ghost" id="backup">Backup</button>
         <button type="button" class="btn ghost" id="restore">Restore</button>
+        <button type="button" class="btn ghost" id="sign-out">Sign out</button>
         <input id="restore-file" type="file" accept="application/json" hidden>
       </div>
     </section>
@@ -988,8 +1096,8 @@
     </div>
 
     <div id="view-ranks" class="view" hidden>
-      <section class="panel" aria-label="Rankings">
-        <div class="kicker">Rankings</div>
+      <section class="panel" aria-label="Team Stats">
+        <div class="kicker">Team Stats</div>
         <label class="play-pick" id="rank-pick-wrap">
           <span>Stat</span>
           <select id="rank-pick" aria-label="Stat">
@@ -1017,6 +1125,35 @@
         <div id="ranks-body"></div>
       </section>
     </div>
+
+    <div id="view-league" class="view" hidden>
+      <section class="panel" aria-label="League Ranking">
+        <div class="kicker">League Ranking</div>
+        <form class="league-form" id="league-form">
+          <label class="field">Team
+            <input id="league-name" type="text" maxlength="32" placeholder="Team" autocomplete="off" spellcheck="false">
+          </label>
+          <button type="submit" class="btn">Add team</button>
+        </form>
+        <p class="empty">Pomfret's record comes from saved games. Add the other teams in the league and enter their wins, losses, and ties.</p>
+        <div class="book-scroll">
+          <table class="stats league">
+            <thead>
+              <tr>
+                <th class="ord"></th>
+                <th class="who">Team</th>
+                <th class="num">W</th>
+                <th class="num">L</th>
+                <th class="num">T</th>
+                <th class="num">PCT</th>
+                <th></th>
+              </tr>
+            </thead>
+            <tbody id="league-body"></tbody>
+          </table>
+        </div>
+      </section>
+    </div>
     <footer class="note">One file. Open it in any browser. Plays, the roster, and the season stay in the shared book, so a new phone picks up where the last one left off.</footer>
   </main>
   <div id="profile" class="profile" hidden>
@@ -1041,12 +1178,16 @@
   const ROSTER_KEY = "pomfret-griffins-roster-v1";
   const CLIENT_KEY = "pomfret-griffins-client";
   const CLOUD_URL = "https://mantledb.sh/v2/pomfret-griffins-scorebook-b7k2/book";
+  const SCORE_USER = "griffins";
+  const SCORE_PASS = "blackandred";
+  const ACCESS_KEY = "pomfret-griffins-access";
   const POSITIONS = ["P", "C", "1B", "2B", "3B", "SS", "LF", "CF", "RF", "DH", "EH"];
   const ROSTER_SIZE = 25;
   const REGULATION = 7;
   const undoStack = [];
   let state;
   let roster = [];
+  let role = "";
 
   const $ = (id) => document.getElementById(id);
 
@@ -1114,16 +1255,19 @@
       const parsed = raw ? JSON.parse(raw) : null;
       const season = parsed && Array.isArray(parsed.games) ? parsed : { games: [] };
       if (!Array.isArray(season.schedule)) season.schedule = [];
+      if (season.league != null && !Array.isArray(season.league)) season.league = [];
       return season;
     } catch (e) {
       return { games: [], schedule: [] };
     }
   }
   function saveSeason(season) {
+    if (!canEdit() && !applyingRemote) return;
     try { localStorage.setItem(SEASON_KEY, JSON.stringify(season)); } catch (e) { /* keep going */ }
     queueCloud();
   }
   function persist() {
+    if (!canEdit() && !applyingRemote) return;
     try { localStorage.setItem(GAME_KEY, JSON.stringify(state)); } catch (e) { /* keep going */ }
     queueCloud();
   }
@@ -1178,6 +1322,7 @@
     }
   }
   function saveRoster() {
+    if (!canEdit() && !applyingRemote) return;
     try { localStorage.setItem(ROSTER_KEY, JSON.stringify(roster)); } catch (e) { /* keep going */ }
     queueCloud();
   }
@@ -1770,6 +1915,80 @@
     if (input.value !== value) input.value = value;
   }
 
+  function canEdit() { return role === "editor"; }
+  function storedRole() {
+    try {
+      const saved = sessionStorage.getItem(ACCESS_KEY);
+      return saved === "editor" || saved === "spectator" ? saved : "";
+    } catch (e) {
+      return "";
+    }
+  }
+  function viewOnlyControl(el) {
+    return !!(el.closest("#gate")
+      || el.classList.contains("tab")
+      || el.classList.contains("name-link")
+      || el.classList.contains("roster-name")
+      || el.id === "profile-close"
+      || el.id === "copy"
+      || el.id === "backup"
+      || el.id === "log-toggle"
+      || el.id === "watch-leave"
+      || el.id === "sign-out"
+      || el.id === "rank-pick");
+  }
+  function applyAccess() {
+    const watching = role === "spectator";
+    document.body.classList.toggle("watching", watching);
+    $("gate").hidden = canEdit() || watching;
+    $("watch-note").hidden = !watching;
+    if (canEdit()) {
+      document.querySelectorAll("button, input, select, textarea").forEach((el) => {
+        if (el.closest("#gate")) return;
+        el.disabled = false;
+        if (el.tagName === "INPUT" || el.tagName === "TEXTAREA") el.readOnly = false;
+      });
+      const locked = gameStarted();
+      const live = locked && !state.final;
+      document.querySelectorAll(".pad button").forEach((btn) => { btn.disabled = !live; });
+      refreshPlayMenus();
+      $("side-away").disabled = locked;
+      $("side-home").disabled = locked;
+      return;
+    }
+    document.querySelectorAll("button, input, select, textarea").forEach((el) => {
+      if (viewOnlyControl(el)) return;
+      el.disabled = true;
+    });
+  }
+  function enterAs(next) {
+    role = next;
+    try { sessionStorage.setItem(ACCESS_KEY, next); } catch (e) { /* this tab asks again next time */ }
+    $("gate-error").hidden = true;
+    paint();
+    if (next === "editor") pushIfAhead();
+  }
+  function leaveBook() {
+    if (canEdit() && localDirty) pushBook();
+    role = "";
+    try { sessionStorage.removeItem(ACCESS_KEY); } catch (e) { /* the gate still shows */ }
+    $("gate-pass").value = "";
+    $("gate-error").hidden = true;
+    paint();
+    $("gate-user").focus();
+  }
+  async function pushIfAhead() {
+    if (!canEdit() || !syncReady) return;
+    let remote = null;
+    try { remote = await fetchCloud(); } catch (e) { remote = null; }
+    if (!canEdit() || !remote) return;
+    if (bookScore(currentBook()) > bookScore(remote)) {
+      localDirty = true;
+      dirtyAt = Date.now();
+      pushBook();
+    }
+  }
+
   function paint() {
     syncRosterIntoGame();
     ensureInnings();
@@ -1807,10 +2026,12 @@
     syncPitchers();
     paintSeason(season);
     paintSchedule(season);
+    paintLeague(season);
     paintRankings();
     paintRoster();
     paintPitchMenu();
     if (!$("profile").hidden) paintProfile($("profile").dataset.id || "", $("profile").dataset.key || "");
+    applyAccess();
   }
 
   function paintBoard() {
@@ -2555,8 +2776,185 @@
       body.appendChild(tr);
     });
   }
+  function leagueNames(season) {
+    const seen = new Set();
+    const names = [];
+    const add = (value) => {
+      const name = (value || "").trim();
+      if (!name || name.toLowerCase() === "opponent") return;
+      const key = name.toLowerCase();
+      if (seen.has(key)) return;
+      seen.add(key);
+      names.push(name);
+    };
+    (season.schedule || []).forEach((game) => add(game.opponent));
+    (season.games || []).forEach((game) => add(game.opponent));
+    add(state.opponent);
+    return names;
+  }
+  function ensureLeague(season) {
+    if (Array.isArray(season.league)) return season.league;
+    season.league = leagueNames(season).map((name) => ({
+      id: "lg" + Math.random().toString(36).slice(2, 8),
+      name: name,
+      w: 0,
+      l: 0,
+      t: 0
+    }));
+    saveSeason(season);
+    return season.league;
+  }
+  function formatPct(w, l, t) {
+    const games = w + l + t;
+    if (!games) return "—";
+    const pct = (w + t * 0.5) / games;
+    const text = pct.toFixed(3);
+    return pct >= 1 ? text : text.replace(/^0/, "");
+  }
+  function leagueStandings(season) {
+    const games = season.games || [];
+    const rows = [{
+      id: "pomfret",
+      name: "Pomfret",
+      ours: true,
+      w: games.filter((g) => g.rP > g.rO).length,
+      l: games.filter((g) => g.rP < g.rO).length,
+      t: games.filter((g) => g.rP === g.rO).length
+    }];
+    ensureLeague(season).forEach((team) => {
+      rows.push({
+        id: team.id,
+        name: team.name,
+        ours: false,
+        w: Number(team.w) || 0,
+        l: Number(team.l) || 0,
+        t: Number(team.t) || 0
+      });
+    });
+    const rate = (row) => {
+      const played = row.w + row.l + row.t;
+      return played ? (row.w + row.t * 0.5) / played : -1;
+    };
+    rows.sort((a, b) => rate(b) - rate(a) || b.w - a.w || a.name.localeCompare(b.name));
+    let place = 0;
+    let previous = null;
+    rows.forEach((row, index) => {
+      const key = rate(row).toFixed(4) + ":" + row.w;
+      if (key !== previous) place = index + 1;
+      previous = key;
+      row.place = place;
+    });
+    return rows;
+  }
+  function leagueMark(id, key, value) {
+    const season = loadSeason();
+    const team = (season.league || []).find((item) => item.id === id);
+    if (!team) return;
+    const n = parseInt(value, 10);
+    team[key] = n > 0 ? n : 0;
+    saveSeason(season);
+    paint();
+  }
+  function addLeagueTeam(name) {
+    const clean = (name || "").trim();
+    if (!clean) return;
+    if (/^pomfret( griffins)?$/i.test(clean) || /^griffins$/i.test(clean)) {
+      toast("Pomfret is already in the standings");
+      return;
+    }
+    const season = loadSeason();
+    const league = ensureLeague(season);
+    if (league.some((team) => team.name.toLowerCase() === clean.toLowerCase())) {
+      toast("That team is already in the standings");
+      return;
+    }
+    league.push({ id: "lg" + Date.now().toString(36), name: clean, w: 0, l: 0, t: 0 });
+    saveSeason(season);
+    paint();
+  }
+  function removeLeagueTeam(id) {
+    const season = loadSeason();
+    season.league = (season.league || []).filter((team) => team.id !== id);
+    saveSeason(season);
+    paint();
+  }
+  function leagueCell(text, className) {
+    const td = document.createElement("td");
+    if (className) td.className = className;
+    td.textContent = text;
+    return td;
+  }
+  function buildLeague(rows) {
+    const body = $("league-body");
+    body.innerHTML = "";
+    rows.forEach((row) => {
+      const tr = document.createElement("tr");
+      tr.dataset.id = row.id;
+      if (row.ours) tr.className = "ours";
+      tr.appendChild(leagueCell(String(row.place), "ord" + (row.place === 1 ? " lead" : "")));
+      tr.appendChild(leagueCell(row.name, "who"));
+      ["w", "l", "t"].forEach((key) => {
+        const td = document.createElement("td");
+        td.className = "num";
+        if (row.ours) {
+          td.textContent = String(row[key]);
+        } else {
+          const input = document.createElement("input");
+          input.className = "num";
+          input.type = "text";
+          input.inputMode = "numeric";
+          input.maxLength = 3;
+          input.value = String(row[key]);
+          input.dataset.mark = key;
+          input.setAttribute("aria-label", row.name + " " + key.toUpperCase());
+          input.addEventListener("input", () => leagueMark(row.id, key, input.value));
+          td.appendChild(input);
+        }
+        tr.appendChild(td);
+      });
+      const pct = leagueCell(formatPct(row.w, row.l, row.t), "num");
+      pct.dataset.pct = "1";
+      tr.appendChild(pct);
+      const act = document.createElement("td");
+      if (!row.ours) act.appendChild(mini("Remove", () => removeLeagueTeam(row.id)));
+      tr.appendChild(act);
+      body.appendChild(tr);
+    });
+  }
+  function updateLeague(rows) {
+    rows.forEach((row) => {
+      const tr = $("league-body").querySelector("tr[data-id='" + row.id + "']");
+      if (!tr) return;
+      const place = tr.querySelector(".ord");
+      if (place) {
+        place.textContent = String(row.place);
+        place.className = "ord" + (row.place === 1 ? " lead" : "");
+      }
+      ["w", "l", "t"].forEach((key) => {
+        const input = tr.querySelector("input[data-mark='" + key + "']");
+        if (input) {
+          if (document.activeElement !== input && input.value !== String(row[key])) input.value = String(row[key]);
+        } else {
+          const cells = tr.querySelectorAll("td.num");
+          const index = { w: 0, l: 1, t: 2 }[key];
+          if (cells[index] && !cells[index].querySelector("input")) cells[index].textContent = String(row[key]);
+        }
+      });
+      const pct = tr.querySelector("[data-pct]");
+      if (pct) pct.textContent = formatPct(row.w, row.l, row.t);
+    });
+  }
+  function paintLeague(season) {
+    const rows = leagueStandings(season);
+    const body = $("league-body");
+    const typing = body.contains(document.activeElement);
+    const current = [...body.children];
+    const mismatch = current.length !== rows.length || current.some((tr, i) => tr.dataset.id !== rows[i].id);
+    if (mismatch && !typing) buildLeague(rows);
+    else updateLeague(rows);
+  }
   function showTab(name) {
-    ["play", "roster", "book", "ranks"].forEach((id) => {
+    ["play", "roster", "book", "ranks", "league"].forEach((id) => {
       const on = name === id;
       $("view-" + id).hidden = !on;
       $("tab-" + id).classList.toggle("on", on);
@@ -3235,6 +3633,12 @@
   $("tab-roster").addEventListener("click", () => showTab("roster"));
   $("tab-book").addEventListener("click", () => showTab("book"));
   $("tab-ranks").addEventListener("click", () => showTab("ranks"));
+  $("tab-league").addEventListener("click", () => showTab("league"));
+  $("league-form").addEventListener("submit", (e) => {
+    e.preventDefault();
+    addLeagueTeam($("league-name").value);
+    $("league-name").value = "";
+  });
   $("rank-pick").addEventListener("change", paintRankings);
   $("log-toggle").addEventListener("click", () => {
     const list = $("log");
@@ -3299,6 +3703,7 @@
   });
 
   document.addEventListener("keydown", (e) => {
+    if (!canEdit()) return;
     const tag = (e.target.tagName || "").toLowerCase();
     if (tag === "input" || tag === "textarea" || tag === "select") return;
     if (e.metaKey || e.ctrlKey || e.altKey) return;
@@ -3370,7 +3775,7 @@
     if (state.final == null) state.final = false;
   }
   function queueCloud() {
-    if (!syncReady || applyingRemote) return;
+    if (!canEdit() || !syncReady || applyingRemote) return;
     localDirty = true;
     dirtyAt = Date.now();
     setSync("Saving to the shared book…");
@@ -3410,7 +3815,7 @@
     }
   }
   async function pushBook() {
-    if (!localDirty || syncing) return;
+    if (!canEdit() || !localDirty || syncing) return;
     const stamp = dirtyAt;
     syncing = true;
     try {
@@ -3464,7 +3869,7 @@
     const fromFile = remote && !remote.rev;
     if (remote && bookScore(remote) > bookScore(local)) applyBook(remote);
     syncReady = true;
-    if (!remote || bookScore(currentBook()) > bookScore(remote) || fromFile) {
+    if (canEdit() && (!remote || bookScore(currentBook()) > bookScore(remote) || fromFile)) {
       if (bookScore(currentBook()) > 0) {
         localDirty = true;
         dirtyAt = Date.now();
@@ -3476,7 +3881,7 @@
       setSync("Shared with every phone");
     }
     setInterval(() => {
-      if (localDirty) pushBook();
+      if (canEdit() && localDirty) pushBook();
       else pullBook();
     }, 5000);
     document.addEventListener("visibilitychange", () => {
@@ -3484,6 +3889,48 @@
     });
   }
 
+  document.addEventListener("click", (e) => {
+    if (canEdit()) return;
+    const btn = e.target.closest("button");
+    if (!btn || viewOnlyControl(btn)) return;
+    e.preventDefault();
+    e.stopImmediatePropagation();
+  }, true);
+  document.addEventListener("submit", (e) => {
+    if (canEdit() || e.target.id === "gate-form") return;
+    e.preventDefault();
+    e.stopImmediatePropagation();
+  }, true);
+  document.addEventListener("beforeinput", (e) => {
+    if (canEdit() || (e.target.closest && e.target.closest("#gate"))) return;
+    e.preventDefault();
+  }, true);
+  document.addEventListener("input", (e) => {
+    if (canEdit() || (e.target.closest && e.target.closest("#gate"))) return;
+    e.stopImmediatePropagation();
+  }, true);
+  document.addEventListener("change", (e) => {
+    if (canEdit() || e.target.id === "rank-pick" || (e.target.closest && e.target.closest("#gate"))) return;
+    e.stopImmediatePropagation();
+  }, true);
+  $("gate-form").addEventListener("submit", (e) => {
+    e.preventDefault();
+    const user = $("gate-user").value.trim().toLowerCase();
+    const pass = $("gate-pass").value;
+    if (user === SCORE_USER && pass === SCORE_PASS) {
+      $("gate-pass").value = "";
+      enterAs("editor");
+      return;
+    }
+    $("gate-error").hidden = false;
+    $("gate-pass").value = "";
+    $("gate-pass").focus();
+  });
+  $("gate-watch").addEventListener("click", () => enterAs("spectator"));
+  $("watch-leave").addEventListener("click", leaveBook);
+  $("sign-out").addEventListener("click", leaveBook);
+
+  role = storedRole();
   state = loadGame();
   roster = loadRoster();
   if (!roster) {
@@ -3495,6 +3942,7 @@
   settleLoaded();
   persist();
   paint();
+  if (!role) $("gate-user").focus();
   syncStart();
 })();
 </script>
