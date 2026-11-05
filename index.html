@@ -512,6 +512,89 @@
   .slate th, .slate td { text-align: left; }
   .slate td.act { text-align: right; }
   .slate .muted { color: var(--muted); font-weight: 700; }
+  .sheet-open { min-height: 28px; padding: 2px 8px; font-size: 12px; letter-spacing: 0.04em; }
+  .sheet {
+    position: fixed;
+    inset: 0;
+    z-index: 25;
+    background: rgba(18, 13, 12, 0.55);
+    overflow: auto;
+    padding: 18px 12px 32px;
+  }
+  .sheet[hidden] { display: none !important; }
+  .sheet-bar {
+    width: min(10.4in, 100%);
+    margin: 0 auto 10px;
+    display: flex;
+    justify-content: flex-end;
+    gap: 8px;
+  }
+  .sheet-page {
+    width: 10.4in;
+    margin: 0 auto;
+    background: white;
+    color: var(--black);
+    border: 1px solid var(--black);
+    box-shadow: var(--shadow);
+    padding: 0.38in 0.4in 0.32in;
+    font-size: 11px;
+  }
+  .sheet-page h2 {
+    margin: 0;
+    font-size: 28px;
+    line-height: 0.9;
+    letter-spacing: 0.04em;
+    text-transform: uppercase;
+  }
+  .sheet-page .eyebrow { color: var(--red); }
+  .sheet-meta { margin: 4px 0 10px; font-weight: 800; letter-spacing: 0.04em; text-transform: uppercase; }
+  .sheet-line, .sheet-grid, .sheet-pit {
+    width: 100%;
+    border-collapse: collapse;
+    margin: 0 0 10px;
+  }
+  .sheet-line th, .sheet-line td, .sheet-grid th, .sheet-grid td, .sheet-pit th, .sheet-pit td {
+    border: 1px solid var(--black);
+    text-align: center;
+    padding: 2px 3px;
+    font-weight: 700;
+  }
+  .sheet-line th, .sheet-grid th, .sheet-pit th {
+    font-size: 9px;
+    letter-spacing: 0.06em;
+    text-transform: uppercase;
+    background: var(--cream);
+  }
+  .sheet-line .team, .sheet-grid .who, .sheet-pit .who { text-align: left; white-space: nowrap; }
+  .sheet-line .team { font-weight: 800; width: 3.2rem; }
+  .sheet-grid .who { width: 2.15in; }
+  .sheet-grid .who b { font-weight: 800; }
+  .sheet-grid .who small { margin-left: 6px; color: var(--muted); font-weight: 700; letter-spacing: 0.02em; }
+  .sheet-grid .who small.sub { display: block; margin-left: 0; }
+  .sheet-grid .num { width: 0.32in; }
+  .sheet-grid .box {
+    width: 0.46in;
+    height: 0.32in;
+    position: relative;
+    background:
+      linear-gradient(to bottom right, transparent calc(50% - 0.4px), rgba(18, 13, 12, 0.35) calc(50% - 0.4px), rgba(18, 13, 12, 0.35) calc(50% + 0.4px), transparent calc(50% + 0.4px)),
+      linear-gradient(to bottom left, transparent calc(50% - 0.4px), rgba(18, 13, 12, 0.35) calc(50% - 0.4px), rgba(18, 13, 12, 0.35) calc(50% + 0.4px), transparent calc(50% + 0.4px));
+  }
+  .sheet-grid .ink {
+    position: relative;
+    z-index: 1;
+    font-family: "American Typewriter", "Courier New", monospace;
+    font-size: 11px;
+    font-weight: 700;
+    line-height: 1.05;
+  }
+  .sheet-grid .ink.hit { color: var(--red); }
+  .sheet-grid .ink sup { font-size: 8px; }
+  .sheet-grid .tot, .sheet-line .tot { background: #f6f1ea; font-weight: 800; }
+  .sheet-kicker { margin: 8px 0 4px; font-size: 11px; letter-spacing: 0.16em; text-transform: uppercase; font-weight: 800; }
+  .sheet-kicker.ours { color: var(--red); }
+  .sheet-sign { margin-top: 8px; font-weight: 800; letter-spacing: 0.08em; text-transform: uppercase; font-size: 10px; }
+  .sheet-sign span { display: inline-block; width: 2.4in; border-bottom: 1px solid var(--black); margin-left: 8px; transform: translateY(-2px); }
   .record { font-weight: 800; letter-spacing: 0.06em; margin: 0 0 10px; }
   .league-form { display: flex; flex-wrap: wrap; gap: 10px; align-items: end; margin-bottom: 14px; }
   .league-form .field { min-width: 220px; flex: 1; }
@@ -693,7 +776,22 @@
     cursor: pointer;
   }
   @media print {
-    .band, .toolbar, .pad, .group, .play-pick, .park-card, .switch, #chooser, .rowbtns, #toast, .lede-wrap, .tabs, .sched-form, .league-form, .profile, .gate { display: none !important; }
+    .band, .toolbar, .pad, .group, .play-pick, .park-card, .switch, #chooser, .rowbtns, #toast, .lede-wrap, .tabs, .sched-form, .league-form, .profile, .gate, .sheet-bar { display: none !important; }
+    body.printing-sheet header,
+    body.printing-sheet .lede-wrap,
+    body.printing-sheet main,
+    body.printing-sheet footer,
+    body.printing-sheet .gate,
+    body.printing-sheet #profile,
+    body.printing-sheet #toast { display: none !important; }
+    body.printing-sheet #sheet {
+      display: block !important;
+      position: static !important;
+      background: white !important;
+      padding: 0 !important;
+      overflow: visible !important;
+    }
+    body.printing-sheet .sheet-page { box-shadow: none !important; border: 0 !important; width: 100% !important; padding: 0 !important; }
     .park-layout { grid-template-columns: 1fr !important; }
     .log-toggle::after { display: none; }
     #log { display: block !important; }
@@ -1156,6 +1254,13 @@
     </div>
     <footer class="note">One file. Open it in any browser. Plays, the roster, and the season stay in the shared book, so a new phone picks up where the last one left off.</footer>
   </main>
+  <div id="sheet" class="sheet" hidden>
+    <div class="sheet-bar">
+      <button type="button" class="btn primary" id="sheet-print">Print</button>
+      <button type="button" class="btn ghost" id="sheet-close">Close</button>
+    </div>
+    <article id="sheet-page" class="sheet-page"></article>
+  </div>
   <div id="profile" class="profile" hidden>
     <div class="profile-card" role="dialog" aria-modal="true" aria-labelledby="profile-name">
       <div class="profile-top">
@@ -1935,7 +2040,9 @@
       || el.id === "log-toggle"
       || el.id === "watch-leave"
       || el.id === "sign-out"
-      || el.id === "rank-pick");
+      || el.id === "rank-pick"
+      || el.classList.contains("sheet-open")
+      || el.closest("#sheet"));
   }
   function applyAccess() {
     const watching = role === "spectator";
@@ -2716,6 +2823,287 @@
     rows.sort((a, b) => (a.date || "9999").localeCompare(b.date || "9999") || (a.time || "").localeCompare(b.time || ""));
     return rows;
   }
+  function gameCanPrint(row) {
+    if (!row.game) return false;
+    if (row.game.final) return true;
+    return !!(row.open && state.final && state.gameId === row.game.id);
+  }
+  function liveSheetBook() {
+    const snap = gameSnapshot();
+    snap.opponent = oppName();
+    return snap;
+  }
+  function bookForSheet(id) {
+    const season = loadSeason();
+    const saved = (season.games || []).find((g) => g.id === id);
+    if (state.gameId === id && state.final) return liveSheetBook();
+    if (saved && saved.final) return saved;
+    return null;
+  }
+  function sheetCode(message) {
+    const m = message.toLowerCase();
+    if (m.includes("homered")) return "HR";
+    if (m.includes("tripled")) return "3B";
+    if (m.includes("doubled")) return "2B";
+    if (m.includes("singled")) return "1B";
+    if (m.includes("struck out")) return "K";
+    if (m.includes("hit by a pitch")) return "HBP";
+    if (m.includes("walked")) return "BB";
+    if (m.includes("double play")) return "DP";
+    if (m.includes("sacrifice")) return "SAC";
+    if (m.includes("fielder's choice")) return "FC";
+    if (m.includes("reached on an error")) return "E";
+    if (m.includes("grounded out")) return "GO";
+    if (m.includes("flew out")) return "FO";
+    if (m.includes("lined out")) return "LO";
+    if (m.includes("popped out")) return "PO";
+    return "";
+  }
+  function sheetWho(message) {
+    let text = message.replace(/, \d+ RBI$/, "");
+    const tails = [
+      " reached on a fielder's choice",
+      " reached on an error",
+      " was hit by a pitch",
+      " struck out",
+      " grounded out",
+      " double play",
+      " flew out",
+      " lined out",
+      " popped out",
+      " sacrifice",
+      " homered",
+      " tripled",
+      " doubled",
+      " singled",
+      " walked"
+    ];
+    const low = text.toLowerCase();
+    for (let i = 0; i < tails.length; i++) {
+      if (low.endsWith(tails[i])) return text.slice(0, text.length - tails[i].length).trim();
+    }
+    return text.trim();
+  }
+  function sheetEvents(log) {
+    const events = [];
+    const lines = log || [];
+    for (let i = lines.length - 1; i >= 0; i--) {
+      const bits = String(lines[i]).split(" · ");
+      if (bits.length < 2) continue;
+      const stamp = bits[0].match(/^(Top|Bot) (\d+)/);
+      if (!stamp) continue;
+      const message = bits.slice(1, bits.length - 1).join(" · ") || bits[1];
+      const code = sheetCode(message);
+      if (!code) continue;
+      const rbiMatch = message.match(/(\d+) RBI/);
+      events.push({
+        half: stamp[1] === "Top" ? "top" : "bottom",
+        inning: Number(stamp[2]),
+        code: code,
+        rbi: rbiMatch ? Number(rbiMatch[1]) : 0,
+        who: sheetWho(message)
+      });
+    }
+    return events;
+  }
+  function sameSheetPlayer(name, number, label) {
+    const got = (label || "").trim().toLowerCase();
+    const plain = (name || "").trim().toLowerCase();
+    if (!got || !plain) return false;
+    if (got === plain) return true;
+    const tagged = ((number ? "#" + number + " " : "") + (name || "").trim()).trim().toLowerCase();
+    return got === tagged || got.endsWith(" " + plain);
+  }
+  function splitWho(label) {
+    const bits = (label || "").trim().match(/^#(\S+)\s+(.*)$/);
+    if (bits) return { number: bits[1], name: bits[2] };
+    return { number: "", name: (label || "").trim() };
+  }
+  function sheetRows(events, half, order, pool) {
+    const pas = events.filter((e) => e.half === half);
+    const count = Math.max((order || []).length, 9);
+    const rows = [];
+    for (let i = 0; i < count; i++) {
+      const p = (order || [])[i] || {};
+      rows.push({
+        name: "",
+        number: "",
+        pos: p.pos || "",
+        r: 0,
+        orderName: (p.name || "").trim(),
+        orderNumber: (p.number || "").trim(),
+        orderR: p.r || 0,
+        cells: {},
+        ab: 0,
+        h: 0,
+        rbi: 0,
+        bb: 0,
+        so: 0,
+        subs: [],
+        named: false
+      });
+    }
+    const remember = (row, label) => {
+      if (!label) return;
+      if (!row.named) {
+        const parsed = splitWho(label);
+        row.named = true;
+        row.name = parsed.name;
+        row.number = parsed.number || row.orderNumber;
+        if (row.orderName && !sameSheetPlayer(row.orderName, row.orderNumber, label)) {
+          row.subs.push(row.orderNumber ? "#" + row.orderNumber + " " + row.orderName : row.orderName);
+        }
+        return;
+      }
+      if (sameSheetPlayer(row.name, row.number, label)) return;
+      if (row.subs.some((s) => s.toLowerCase() === label.toLowerCase())) return;
+      row.subs.push(label);
+    };
+    pas.forEach((pa, index) => {
+      const row = rows[index % count];
+      remember(row, pa.who);
+      if (!row.cells[pa.inning]) row.cells[pa.inning] = [];
+      row.cells[pa.inning].push(pa);
+      if (pa.code !== "BB" && pa.code !== "HBP" && pa.code !== "SAC") row.ab += 1;
+      if (pa.code === "1B" || pa.code === "2B" || pa.code === "3B" || pa.code === "HR") row.h += 1;
+      if (pa.code === "BB") row.bb += 1;
+      if (pa.code === "K") row.so += 1;
+      row.rbi += pa.rbi || 0;
+    });
+    rows.forEach((row) => {
+      if (!row.name) {
+        row.name = row.orderName;
+        row.number = row.orderNumber;
+        row.r = row.orderR;
+        return;
+      }
+      const labels = [(row.number ? "#" + row.number + " " : "") + row.name].concat(row.subs);
+      const used = new Set();
+      let runs = 0;
+      let found = false;
+      labels.forEach((label) => {
+        const hit = (pool || []).find((p) => p && !used.has(p.id || p.name) && sameSheetPlayer(p.name || "", p.number || "", label));
+        if (!hit) return;
+        used.add(hit.id || hit.name);
+        runs += hit.r || 0;
+        found = true;
+      });
+      row.r = found ? runs : row.orderR;
+    });
+    return rows;
+  }
+  function sheetInnings(book, events) {
+    let n = REGULATION;
+    const runs = book.runs || {};
+    n = Math.max(n, (runs.pomfret || []).length, (runs.opp || []).length, book.inning || 0);
+    events.forEach((e) => { if (e.inning > n) n = e.inning; });
+    return n;
+  }
+  function sheetInnVal(book, team, index, topTeam) {
+    const skipped = book.final && book.half === "top" && index === (book.inning || 1) - 1 && team !== topTeam;
+    if (skipped) return "X";
+    if (index >= (book.inning || REGULATION)) return "";
+    const arr = (book.runs && book.runs[team]) || [];
+    return String(arr[index] || 0);
+  }
+  function sheetInk(pas) {
+    if (!pas || !pas.length) return "";
+    return pas.map((pa) => {
+      const hit = pa.code === "1B" || pa.code === "2B" || pa.code === "3B" || pa.code === "HR";
+      const rbi = pa.rbi ? "<sup>" + pa.rbi + "</sup>" : "";
+      return "<span class='ink" + (hit ? " hit" : "") + "'>" + esc(pa.code) + rbi + "</span>";
+    }).join("<br>");
+  }
+  function sheetName(row, index) {
+    const name = row.name || ("Batter " + (index + 1));
+    const num = row.number ? "<small>#" + esc(row.number) + (row.pos ? " · " + esc(row.pos) : "") + "</small>" : (row.pos ? "<small>" + esc(row.pos) + "</small>" : "");
+    const subs = row.subs.length ? "<small class='sub'>" + row.subs.map((s) => esc(s)).join(", ") + "</small>" : "";
+    return "<b>" + esc(name) + "</b>" + num + subs;
+  }
+  function sheetGrid(title, ours, rows, innings) {
+    let html = "<div class='sheet-kicker" + (ours ? " ours" : "") + "'>" + esc(title) + "</div>";
+    html += "<table class='sheet-grid'><thead><tr><th class='num'>#</th><th class='who'>Player</th>";
+    for (let i = 1; i <= innings; i++) html += "<th>" + i + "</th>";
+    ["AB", "R", "H", "RBI", "BB", "SO"].forEach((h) => { html += "<th class='tot'>" + h + "</th>"; });
+    html += "</tr></thead><tbody>";
+    rows.forEach((row, index) => {
+      const played = row.ab || row.h || row.bb || row.so || row.rbi || row.name;
+      if (!played && index >= 9) return;
+      html += "<tr><td class='num'>" + (index + 1) + "</td><td class='who'>" + sheetName(row, index) + "</td>";
+      for (let i = 1; i <= innings; i++) html += "<td class='box'>" + sheetInk(row.cells[i]) + "</td>";
+      [row.ab, row.r, row.h, row.rbi, row.bb, row.so].forEach((n) => { html += "<td class='tot'>" + (n || 0) + "</td>"; });
+      html += "</tr>";
+    });
+    return html + "</tbody></table>";
+  }
+  function renderSheet(book) {
+    const events = sheetEvents(book.log);
+    const home = !!book.pomfretHome;
+    const pomHalf = home ? "bottom" : "top";
+    const oppHalf = home ? "top" : "bottom";
+    const innings = sheetInnings(book, events);
+    const topTeam = home ? "opp" : "pomfret";
+    const opp = (book.opponent || "").trim() || "Opponent";
+    const side = home ? "Home" : "Away";
+    const where = book.site ? " · " + book.site : "";
+    let html = "<div class='eyebrow'>Pomfret baseball</div><h2>Griffins</h2>";
+    html += "<p class='sheet-meta'>" + esc(formatDate(book.date)) + " · " + esc(side) + " · vs " + esc(opp) + esc(where) + "</p>";
+    html += "<table class='sheet-line'><thead><tr><th class='team'></th>";
+    for (let i = 1; i <= innings; i++) html += "<th>" + i + "</th>";
+    html += "<th class='tot'>R</th><th class='tot'>H</th><th class='tot'>E</th></tr></thead><tbody>";
+    const line = (team, label) => {
+      let row = "<tr><td class='team'>" + esc(label) + "</td>";
+      for (let i = 0; i < innings; i++) row += "<td>" + sheetInnVal(book, team, i, topTeam) + "</td>";
+      const runs = team === "pomfret" ? book.rP : book.rO;
+      const hits = book.hits ? book.hits[team] : "";
+      const errors = book.errors ? book.errors[team] : "";
+      row += "<td class='tot'>" + (runs == null ? "" : runs) + "</td><td class='tot'>" + (hits === "" || hits == null ? "" : hits) + "</td><td class='tot'>" + (errors === "" || errors == null ? "" : errors) + "</td></tr>";
+      return row;
+    };
+    html += line(topTeam, topTeam === "pomfret" ? "POM" : abbrName(opp));
+    html += line(topTeam === "pomfret" ? "opp" : "pomfret", topTeam === "pomfret" ? abbrName(opp) : "POM");
+    html += "</tbody></table>";
+    const pool = (book.lineup || []).concat(book.oppLineup || []).concat(book.batters || []);
+    html += sheetGrid("Pomfret batting", true, sheetRows(events, pomHalf, book.lineup || [], pool), innings);
+    html += sheetGrid(opp + " batting", false, sheetRows(events, oppHalf, book.oppLineup || [], pool), innings);
+    const arms = book.pitchers || [];
+    if (arms.length) {
+      html += "<div class='sheet-kicker'>Pomfret pitching</div><table class='sheet-pit'><thead><tr><th class='who'>Pitcher</th><th>IP</th><th>H</th><th>R</th><th>ER</th><th>BB</th><th>SO</th></tr></thead><tbody>";
+      arms.forEach((p) => {
+        const name = ((p.number ? "#" + p.number + " " : "") + ((p.name || "").trim() || "Pitcher"));
+        html += "<tr><td class='who'>" + esc(name) + "</td><td>" + formatIP(p.outs || 0) + "</td><td>" + (p.h || 0) + "</td><td>" + (p.r || 0) + "</td><td>" + (p.er || 0) + "</td><td>" + (p.bb || 0) + "</td><td>" + (p.so || 0) + "</td></tr>";
+      });
+      html += "</tbody></table>";
+    }
+    html += "<div class='sheet-sign'>Scorer <span></span></div>";
+    return html;
+  }
+  function abbrName(name) {
+    const n = (name || "").trim();
+    if (!n || n.toLowerCase() === "opponent") return "OPP";
+    const parts = n.split(/\s+/);
+    if (parts.length > 1) return parts.map((p) => p[0]).join("").slice(0, 4).toUpperCase();
+    return n.slice(0, 3).toUpperCase();
+  }
+  function openSheet(id) {
+    const book = bookForSheet(id);
+    if (!book) return;
+    $("sheet-page").innerHTML = renderSheet(book);
+    $("sheet").hidden = false;
+    document.body.classList.add("printing-sheet");
+    if (!document.getElementById("sheet-page-size")) {
+      const tag = document.createElement("style");
+      tag.id = "sheet-page-size";
+      tag.textContent = "@page { size: letter landscape; margin: 0.4in; }";
+      document.head.appendChild(tag);
+    }
+  }
+  function closeSheet() {
+    $("sheet").hidden = true;
+    document.body.classList.remove("printing-sheet");
+    const tag = document.getElementById("sheet-page-size");
+    if (tag) tag.remove();
+  }
   function paintSchedule(season) {
     const games = season.games;
     const wins = games.filter((g) => g.rP > g.rO).length;
@@ -2763,6 +3151,14 @@
       act.className = "act";
       const buttons = document.createElement("span");
       buttons.className = "rowbtns";
+      if (gameCanPrint(row)) {
+        const print = document.createElement("button");
+        print.type = "button";
+        print.className = "btn ghost sheet-open";
+        print.textContent = "Print";
+        print.addEventListener("click", () => openSheet(row.game.id));
+        buttons.appendChild(print);
+      }
       if (row.kind === "plan" && !row.game) {
         buttons.appendChild(mini(row.open ? "Play" : "Score", () => openSchedule(row.id)));
       } else if (row.open) {
@@ -3419,6 +3815,15 @@
       rO: sum(state.runs.opp),
       pomfretHome: !!state.pomfretHome,
       batters: state.lineup.concat(state.played).filter((b) => b.name || b.ab || b.bb || b.hbp || b.r || b.h || b.sac).map(slimB),
+      lineup: state.lineup.map(slimB),
+      oppLineup: (state.oppLineup || []).map(slimB),
+      log: (state.log || []).slice(),
+      runs: { pomfret: state.runs.pomfret.slice(), opp: state.runs.opp.slice() },
+      hits: { pomfret: state.hits.pomfret || 0, opp: state.hits.opp || 0 },
+      errors: { pomfret: state.errors.pomfret || 0, opp: state.errors.opp || 0 },
+      final: !!state.final,
+      inning: state.inning,
+      half: state.half,
       pitchers: state.pitchers.filter((p) => p.name || p.outs || p.h || p.bb || p.so || p.r).map((p) => ({
         id: p.id, rosterId: p.rosterId || "", name: p.name, number: p.number, outs: p.outs, h: p.h, r: p.r, er: p.er, bb: p.bb, so: p.so, pitches: p.pitches
       }))
@@ -3661,10 +4066,14 @@
     rosterChanged();
   });
   $("profile-close").addEventListener("click", closeProfile);
+  $("sheet-print").addEventListener("click", () => window.print());
+  $("sheet-close").addEventListener("click", closeSheet);
+  $("sheet").addEventListener("click", (e) => { if (e.target === $("sheet")) closeSheet(); });
   $("profile").addEventListener("click", (e) => { if (e.target === $("profile")) closeProfile(); });
   document.addEventListener("keydown", (e) => {
     if (e.key === "Escape") {
       closePlayMenus();
+      if (!$("sheet").hidden) closeSheet();
       if (!$("profile").hidden) closeProfile();
     }
   });
