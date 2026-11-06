@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
 <meta charset="utf-8">
-<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <meta name="theme-color" content="#120d0c">
 <title>Pomfret Griffins — Game Scorebook</title>
 <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'%3E%3Crect width='64' height='64' fill='%23120d0c'/%3E%3Cpath fill='%23d0122d' d='M10 46c8-18 18-28 22-30 2 6 8 10 14 10-6 4-8 10-8 16-6 2-12 8-16 14-8-2-12-6-12-10z'/%3E%3Cpath fill='%23f3ecdf' d='M14 40c2-10 10-16 18-16 4 4 10 6 14 4-8 6-10 14-8 22-8-2-16-6-24-10z'/%3E%3C/svg>">
@@ -17,6 +17,7 @@
     --line: rgba(18, 13, 12, 0.16);
     --muted: #5e564f;
     --shadow: 4px 4px 0 var(--black);
+    --page: min(1120px, calc(100% - 28px));
   }
 
   * { box-sizing: border-box; }
@@ -42,7 +43,7 @@
     color: var(--cream);
   }
   .top-inner, main {
-    width: min(1120px, calc(100% - 28px));
+    width: var(--page);
     margin: 0 auto;
   }
   .top-inner {
@@ -75,7 +76,7 @@
   }
   .lede-wrap { background: var(--black); color: var(--cream); border-top: 1px solid rgba(244, 238, 228, 0.12); }
   .tabs {
-    width: min(1120px, calc(100% - 28px));
+    width: var(--page);
     margin: 0 auto;
     display: flex;
     flex-wrap: wrap;
@@ -95,14 +96,14 @@
   .tab.on { background: var(--red); color: white; border-color: var(--red); }
   .view[hidden] { display: none; }
   .lede {
-    width: min(1120px, calc(100% - 28px));
+    width: var(--page);
     margin: 0 auto;
     padding: 0 0 18px;
     max-width: 62ch;
     color: rgba(244, 238, 228, 0.88);
   }
   .sync-note {
-    width: min(1120px, calc(100% - 28px));
+    width: var(--page);
     margin: -6px auto 0;
     padding: 0 0 14px;
     font-size: 13px;
@@ -195,12 +196,14 @@
   body.watching #lineup-pick-head,
   body.watching td:has(.sub-pick) { display: none !important; }
   body.watching .park-layout { grid-template-columns: 1fr; }
+  body.watching .meta { grid-template-columns: 150px 1fr 1fr; }
+  body.watching .field:has(#side) { display: none !important; }
 
   .board { padding: 0; overflow: hidden; }
   .board .kicker { margin: 14px 14px 0; }
-  .board-scroll { overflow-x: auto; padding: 10px 14px 14px; }
+  .board-scroll { overflow-x: auto; -webkit-overflow-scrolling: touch; padding: 10px 14px 14px; }
   table { border-collapse: collapse; width: 100%; }
-  .linescore { min-width: 640px; background: var(--black); color: var(--cream); }
+  .linescore { min-width: 0; background: var(--black); color: var(--cream); }
   .linescore th, .linescore td {
     border: 1px solid rgba(244, 238, 228, 0.16);
     text-align: center;
@@ -225,19 +228,22 @@
     grid-template-columns: minmax(300px, 400px) minmax(0, 1fr);
     gap: 16px;
     align-items: start;
+    min-width: 0;
   }
+  .layout > *, .park-layout > *, .panel, .book-scroll, .board-scroll, .meta, .sched-form { min-width: 0; }
   .park-layout {
     display: grid;
     grid-template-columns: minmax(220px, 280px) minmax(0, 1fr);
     gap: 16px;
     align-items: start;
+    min-width: 0;
   }
   .park-card .play-menus { margin: 0; }
-  .park-scroll { overflow-x: auto; }
+  .park-scroll { overflow-x: auto; -webkit-overflow-scrolling: touch; }
   .park {
     position: relative;
-    width: min(820px, 100%);
-    min-width: 680px;
+    width: 100%;
+    min-width: 0;
     margin: 0 auto;
     background: #241816;
     border: 1px solid #120d0c;
@@ -258,8 +264,8 @@
     z-index: 2;
   }
   .mark {
-    width: clamp(36px, 5.2cqw, 46px);
-    height: clamp(36px, 5.2cqw, 46px);
+    width: clamp(32px, 6.6cqw, 64px);
+    height: clamp(32px, 6.6cqw, 64px);
     border-radius: 50%;
     border: 2px solid rgba(244, 238, 228, 0.8);
     background: rgba(18, 13, 12, 0.62);
@@ -267,7 +273,7 @@
     display: grid;
     place-items: center;
     font-weight: 800;
-    font-size: clamp(12px, 2.4cqw, 18px);
+    font-size: clamp(12px, 2.4cqw, 22px);
     letter-spacing: 0.04em;
     box-shadow: 0 2px 0 rgba(0, 0, 0, 0.35);
   }
@@ -478,7 +484,7 @@
   .log li:first-child { font-weight: 800; }
   .empty { color: var(--muted); font-weight: 700; }
 
-  .book-scroll { overflow-x: auto; }
+  .book-scroll { overflow-x: auto; -webkit-overflow-scrolling: touch; }
   .stats { min-width: 640px; font-variant-numeric: tabular-nums; }
   .stats th, .stats td { text-align: right; padding: 4px 5px; border-bottom: 1px solid var(--line); white-space: nowrap; font-size: 15px; }
   .stats th { font-size: 11px; letter-spacing: 0.08em; text-transform: uppercase; color: var(--muted); font-weight: 800; }
@@ -721,15 +727,80 @@
   .rank-group { margin-top: 16px; }
   .rank-group .kicker { margin-bottom: 10px; }
 
-  @media (max-width: 900px) {
-    .meta, .layout, .sched-form { grid-template-columns: 1fr 1fr; }
+  @media (min-width: 1280px) {
+    :root { --page: min(1520px, calc(100% - 56px)); }
+    .slot { width: 12cqw; }
+    .slot-name { font-size: clamp(12px, 1.5cqw, 16px); }
+    .park-layout { grid-template-columns: minmax(260px, 320px) minmax(0, 1fr); }
   }
-  @media (max-width: 560px) {
-    .top-inner { gap: 12px; }
-    .crest { width: 62px; height: 62px; }
+  @media (min-width: 1680px) {
+    :root { --page: min(1720px, calc(100% - 80px)); }
+  }
+  @media (max-width: 1080px) {
+    .park-layout, body.watching .park-layout { grid-template-columns: 1fr; }
+    .meta, body.watching .meta { grid-template-columns: 1fr 1fr; }
+    .sched-form { grid-template-columns: 1fr 1fr 1fr; }
+  }
+  @media (max-width: 900px) {
+    .layout { grid-template-columns: 1fr; }
+    .sched-form { grid-template-columns: 1fr 1fr; }
+    #lineup th.who, #lineup td.who,
+    #pitching th.who, #pitching td.who,
+    .roster-table th.who, .roster-table td.who,
+    #season-bat th.who, #season-bat td.who,
+    #season-pit th.who, #season-pit td.who {
+      position: sticky;
+      left: 0;
+      z-index: 1;
+      background: var(--paper);
+    }
+    #lineup tr.active td.who, #lineup tr.due td.who { background: #f8e4e6; }
+  }
+  @media (max-width: 700px) {
+    :root { --page: calc(100% - 20px); }
+    body { font-size: 16px; }
+    .top-inner { gap: 12px; padding: 16px 0 14px; }
+    .crest { width: 56px; height: 56px; }
+    h1 { font-size: clamp(34px, 11vw, 48px); }
+    .lede { padding-bottom: 12px; }
+    .tabs { gap: 6px; padding-bottom: 12px; }
+    .tab {
+      flex: 1 1 calc(50% - 6px);
+      max-width: calc(50% - 3px);
+      padding: 8px 8px;
+      letter-spacing: 0.06em;
+      text-align: center;
+      min-height: 44px;
+    }
+    .panel { padding: 12px; }
+    .meta, .sched-form, .league-form, body.watching .meta { grid-template-columns: 1fr; }
+    .sched-form .btn, .league-form .btn { width: 100%; }
+    .toolbar .btn { flex: 1 1 calc(50% - 8px); text-align: center; }
     .count { gap: 6px; }
-    .park-layout { grid-template-columns: 1fr; }
+    .lamp { padding: 6px 2px 8px; }
     .lamp strong { font-size: 28px; }
+    .lamp em { letter-spacing: 0.08em; }
+    .mark {
+      width: 28px;
+      height: 28px;
+      font-size: 12px;
+      border-width: 1.5px;
+    }
+    .slot { width: 22cqw; }
+    .slot-name { font-size: 9px; letter-spacing: 0.02em; }
+    .linescore th, .linescore td { min-width: 0; padding: 6px 1px; font-size: 12px; }
+    .linescore .team { min-width: 3.1rem; padding-left: 6px; letter-spacing: 0.04em; }
+    .stats { min-width: 560px; }
+    .stats th, .stats td { font-size: 13px; padding: 6px 4px; }
+    .slate { min-width: 640px; }
+    .roster-table { min-width: 480px; }
+    .pad button, .play-face { min-height: 48px; }
+    .sheet { padding: 12px 10px 24px; }
+    .sheet-bar { width: 100%; position: sticky; top: 0; }
+    .profile { padding: 16px 10px; }
+    .gate { padding: 16px; }
+    .gate-card h2 { font-size: 40px; }
+    #toast { width: calc(100% - 24px); text-align: center; bottom: max(16px, env(safe-area-inset-bottom)); }
   }
   .gate {
     position: fixed;
