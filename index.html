@@ -645,7 +645,12 @@
   .league td.lead { color: var(--red); }
 
   footer.note { color: var(--muted); font-size: 14px; margin-top: 8px; }
-  .roster-table { min-width: 520px; }
+  .roster-table { min-width: 1480px; }
+  .roster-table td.bat, .roster-table th.bat {
+    text-align: right;
+    font-variant-numeric: tabular-nums;
+    white-space: nowrap;
+  }
   .roster-table td.name { text-align: left; }
   .roster-table td.name input { width: 14rem; }
   .sub-pick { min-width: 8.5rem; }
@@ -939,7 +944,7 @@
     .stats { min-width: 560px; }
     .stats th, .stats td { font-size: 13px; padding: 6px 4px; }
     .slate { min-width: 640px; }
-    .roster-table { min-width: 480px; }
+    .roster-table { min-width: 1480px; }
     .pad button, .play-face { min-height: 48px; }
     .sheet { padding: 12px 10px 24px; }
     .sheet-bar { width: 100%; position: sticky; top: 0; }
@@ -1087,7 +1092,6 @@
       <button type="button" class="tab on" id="tab-play" role="tab" aria-selected="true" aria-controls="view-play">Play</button>
       <button type="button" class="tab" id="tab-roster" role="tab" aria-selected="false" aria-controls="view-roster">Roster</button>
       <button type="button" class="tab" id="tab-book" role="tab" aria-selected="false" aria-controls="view-book">Schedule</button>
-      <button type="button" class="tab" id="tab-ranks" role="tab" aria-selected="false" aria-controls="view-ranks">Team Stats</button>
       <button type="button" class="tab" id="tab-league" role="tab" aria-selected="false" aria-controls="view-league">League Ranking</button>
     </nav>
     <p class="sync-note" id="sync-note">Checking the shared book…</p>
@@ -1349,10 +1353,31 @@
                 <th>#</th>
                 <th class="who">Player</th>
                 <th>Pos</th>
-                <th class="glance"></th>
-                <th class="glance"></th>
-                <th class="glance"></th>
-                <th class="glance"></th>
+                <th class="bat" title="Plate appearances">PA</th>
+                <th class="bat" title="At bats">AB</th>
+                <th class="bat" title="Runs">R</th>
+                <th class="bat" title="Hits">H</th>
+                <th class="bat" title="Doubles">2B</th>
+                <th class="bat" title="Triples">3B</th>
+                <th class="bat" title="Home runs">HR</th>
+                <th class="bat" title="Runs batted in">RBI</th>
+                <th class="bat" title="Stolen bases">SB</th>
+                <th class="bat" title="Caught stealing">CS</th>
+                <th class="bat" title="Walks">BB</th>
+                <th class="bat" title="Strikeouts">SO</th>
+                <th class="bat" title="Batting average">BA</th>
+                <th class="bat" title="On-base percentage">OBP</th>
+                <th class="bat" title="Slugging percentage">SLG</th>
+                <th class="bat" title="On-base plus slugging">OPS</th>
+                <th class="bat" title="OPS compared with the Griffins. 100 is average">OPS+</th>
+                <th class="bat" title="Weighted on-base average">rOBA</th>
+                <th class="bat" title="Weighted runs compared with the Griffins. 100 is average">Rbat+</th>
+                <th class="bat" title="Total bases">TB</th>
+                <th class="bat" title="Grounded into double plays">GIDP</th>
+                <th class="bat" title="Hit by pitch">HBP</th>
+                <th class="bat" title="Sacrifice hits">SH</th>
+                <th class="bat" title="Sacrifice flies">SF</th>
+                <th class="bat" title="Intentional walks">IBB</th>
               </tr>
             </thead>
             <tbody id="roster-body"></tbody>
@@ -1414,37 +1439,6 @@
         <div class="book-scroll" id="season-pit-wrap" hidden style="margin-top:12px">
           <table class="stats" id="season-pit"></table>
         </div>
-      </section>
-    </div>
-
-    <div id="view-ranks" class="view" hidden>
-      <section class="panel" aria-label="Team Stats">
-        <div class="kicker">Team Stats</div>
-        <label class="play-pick" id="rank-pick-wrap">
-          <span>Stat</span>
-          <select id="rank-pick" aria-label="Stat">
-            <optgroup label="Batting">
-              <option value="AVG">AVG</option>
-              <option value="OBP">OBP</option>
-              <option value="SLG">SLG</option>
-              <option value="OPS">OPS</option>
-              <option value="Hits">Hits</option>
-              <option value="Home runs">Home runs</option>
-              <option value="RBI">RBI</option>
-              <option value="Runs">Runs</option>
-              <option value="Stolen bases">Stolen bases</option>
-              <option value="Walks">Walks</option>
-            </optgroup>
-            <optgroup label="Pitching">
-              <option value="ERA">ERA</option>
-              <option value="WHIP">WHIP</option>
-              <option value="Strikeouts">Strikeouts</option>
-              <option value="Innings">Innings</option>
-            </optgroup>
-          </select>
-        </label>
-        <p id="ranks-blurb" class="empty">Start scoring and the leaders fill in from this game. Saved games stay in the season line.</p>
-        <div id="ranks-body"></div>
       </section>
     </div>
 
@@ -1557,7 +1551,7 @@
     return {
       id: makeId(bag), name: "", number: "", pos: pos || "",
       ab: 0, r: 0, h: 0, doubles: 0, triples: 0, hr: 0, rbi: 0,
-      bb: 0, so: 0, hbp: 0, sac: 0, sb: 0, cs: 0
+      bb: 0, so: 0, hbp: 0, sac: 0, sb: 0, cs: 0, gidp: 0
     };
   }
   function blankPitcher(bag) {
@@ -2173,6 +2167,10 @@
       else if (room >= 2 && next[1]) { next[1] = null; outs = 2; }
       else if (room >= 2 && next[2]) { next[2] = null; outs = 2; }
       chargeCounting({ ab: true });
+      if (outs === 2) {
+        const b = plateBatter();
+        if (b) b.gidp = (b.gidp || 0) + 1;
+      }
       state.bases = next;
       const ended = addOuts(outs);
       closePlay(who + (outs === 2 ? " double play" : " grounded out"), ended, true);
@@ -2407,7 +2405,6 @@
       || el.id === "log-toggle"
       || el.id === "watch-leave"
       || el.id === "sign-out"
-      || el.id === "rank-pick"
       || el.classList.contains("sheet-open")
       || el.closest("#sheet"));
   }
@@ -2503,7 +2500,6 @@
     paintSeason(season);
     paintSchedule(season);
     paintLeague(season);
-    paintRankings();
     paintRoster();
     paintPitchMenu();
     if (!$("profile").hidden) paintProfile($("profile").dataset.id || "", $("profile").dataset.key || "");
@@ -3067,99 +3063,6 @@
       [p.g, formatIP(p.outs), p.h, p.r, p.er, p.bb, p.so, formatERA(p)]);
     bindProfileLinks($("season-bat"));
     bindProfileLinks($("season-pit"));
-  }
-  function obpRaw(b) {
-    const den = (b.ab || 0) + (b.bb || 0) + (b.hbp || 0) + (b.sac || 0);
-    if (!den) return null;
-    return ((b.h || 0) + (b.bb || 0) + (b.hbp || 0)) / den;
-  }
-  function slgRaw(b) {
-    if (!b.ab) return null;
-    return totalBases(b) / b.ab;
-  }
-  function seasonLines() {
-    const batters = new Map();
-    const pitchers = new Map();
-    profileGames().forEach((g) => {
-      (g.batters || []).forEach((b) => addTot(batters, keyOf(b), b, ["ab", "r", "h", "doubles", "triples", "hr", "rbi", "bb", "so", "hbp", "sac", "sb"]));
-      (g.pitchers || []).forEach((p) => addTot(pitchers, keyOf(p), p, ["outs", "h", "r", "er", "bb", "so", "pitches"]));
-    });
-    return { batters: [...batters.values()], pitchers: [...pitchers.values()] };
-  }
-  function rankRows(players, valueOf, higher) {
-    const scored = players.map((p) => ({ p, v: valueOf(p) }));
-    scored.sort((a, b) => {
-      if (a.v == null && b.v == null) return (a.p.name || "").localeCompare(b.p.name || "");
-      if (a.v == null) return 1;
-      if (b.v == null) return -1;
-      if (a.v !== b.v) return higher ? b.v - a.v : a.v - b.v;
-      return (a.p.name || "").localeCompare(b.p.name || "");
-    });
-    let place = 0;
-    let last = null;
-    let seen = 0;
-    return scored.map((row) => {
-      seen += 1;
-      if (row.v == null) return { place: null, player: row.p };
-      if (row.v !== last) {
-        place = seen;
-        last = row.v;
-      }
-      return { place, player: row.p };
-    });
-  }
-  function rankCard(title, rows, show) {
-    let html = "<article class='rank-card'><h3>" + esc(title) + "</h3>";
-    rows.forEach((row) => {
-      const p = row.player;
-      const num = (p.number || "").trim();
-      html += "<div class='rank-row'><span class='place" + (row.place === 1 ? " lead" : "") + "'>" + (row.place == null ? "—" : row.place) + "</span>" +
-        "<span class='rank-name'><button type='button' class='name-link' data-roster='" + esc(p.rosterId || "") + "' data-key='" + esc(p.key || "") + "'>" + esc(p.name || "Unnamed") + "</button>" +
-        (num ? "<span class='num'>#" + esc(num) + "</span>" : "") + "</span>" +
-        "<span class='val'>" + esc(show(p)) + "</span></div>";
-    });
-    return html + "</article>";
-  }
-  function rankingBoards(lines) {
-    const obp = (b) => formatRate((b.h || 0) + (b.bb || 0) + (b.hbp || 0), (b.ab || 0) + (b.bb || 0) + (b.hbp || 0) + (b.sac || 0));
-    const board = (players, value, higher, show) => ({ players, value, higher, show });
-    return {
-      AVG: board(lines.batters, (b) => b.ab ? b.h / b.ab : null, true, (b) => formatAvg(b.h, b.ab)),
-      OBP: board(lines.batters, obpRaw, true, obp),
-      SLG: board(lines.batters, slgRaw, true, (b) => formatRate(totalBases(b), b.ab)),
-      OPS: board(lines.batters, (b) => { const o = obpRaw(b); const s = slgRaw(b); return o == null || s == null ? null : o + s; }, true, formatOPS),
-      Hits: board(lines.batters, (b) => b.h || 0, true, (b) => String(b.h || 0)),
-      "Home runs": board(lines.batters, (b) => b.hr || 0, true, (b) => String(b.hr || 0)),
-      RBI: board(lines.batters, (b) => b.rbi || 0, true, (b) => String(b.rbi || 0)),
-      Runs: board(lines.batters, (b) => b.r || 0, true, (b) => String(b.r || 0)),
-      "Stolen bases": board(lines.batters, (b) => b.sb || 0, true, (b) => String(b.sb || 0)),
-      Walks: board(lines.batters, (b) => b.bb || 0, true, (b) => String(b.bb || 0)),
-      ERA: board(lines.pitchers, (p) => p.outs ? (27 * (p.er || 0)) / p.outs : null, false, formatERA),
-      WHIP: board(lines.pitchers, (p) => p.outs ? (((p.h || 0) + (p.bb || 0)) * 3) / p.outs : null, false, formatWHIP),
-      Strikeouts: board(lines.pitchers, (p) => p.so || 0, true, (p) => String(p.so || 0)),
-      Innings: board(lines.pitchers, (p) => p.outs || 0, true, (p) => formatIP(p.outs || 0))
-    };
-  }
-  function paintRankings() {
-    const lines = seasonLines();
-    const body = $("ranks-body");
-    const empty = !lines.batters.length && !lines.pitchers.length;
-    $("ranks-blurb").hidden = !empty;
-    $("rank-pick-wrap").hidden = empty;
-    if (empty) {
-      body.innerHTML = "";
-      return;
-    }
-    const boards = rankingBoards(lines);
-    const pick = $("rank-pick");
-    const chosen = boards[pick.value] ? pick.value : "AVG";
-    if (pick.value !== chosen) pick.value = chosen;
-    const board = boards[chosen];
-    const rows = rankRows(board.players, board.value, board.higher).filter((row) => row.place != null).slice(0, 5);
-    body.innerHTML = rows.length
-      ? rankCard(chosen, rows, board.show)
-      : "<p class='empty'>Nobody qualifies for this one yet.</p>";
-    bindProfileLinks(body);
   }
   function formatDate(iso) {
     if (!iso) return "—";
@@ -3749,7 +3652,7 @@
     else updateLeague(rows);
   }
   function showTab(name) {
-    ["play", "roster", "book", "ranks", "league"].forEach((id) => {
+    ["play", "roster", "book", "league"].forEach((id) => {
       const on = name === id;
       $("view-" + id).hidden = !on;
       $("tab-" + id).classList.toggle("on", on);
@@ -3766,7 +3669,7 @@
   function paintRoster() {
     const body = $("roster-body");
     const rows = [...body.querySelectorAll("tr")];
-    const same = rows.length === roster.length && rows.every((tr, i) => tr.dataset.id === roster[i].id && tr.querySelectorAll("td.glance").length === 4);
+    const same = rows.length === roster.length && rows.every((tr, i) => tr.dataset.id === roster[i].id && tr.querySelectorAll("td.bat").length === 25);
     if (!same) buildRoster();
     updateRosterGlance();
   }
@@ -3789,9 +3692,9 @@
       tr.appendChild(rosterInput(guy, "number", "num", 3));
       tr.appendChild(rosterNameCell(guy));
       tr.appendChild(rosterPos(guy));
-      for (let i = 0; i < 4; i++) {
+      for (let i = 0; i < 25; i++) {
         const td = document.createElement("td");
-        td.className = "glance";
+        td.className = "bat";
         tr.appendChild(td);
       }
       body.appendChild(tr);
@@ -3850,24 +3753,79 @@
     });
     return input;
   }
-  function rosterGlanceBits(guy, lines) {
-    if (guy.pos === "P") {
-      return [
-        { value: formatERA(lines.pit), label: "ERA" },
-        { value: formatWHIP(lines.pit), label: "WHIP" },
-        { value: String(lines.pit.so || 0), label: "SO" }
-      ];
+  function rateParts(b) {
+    const h = b.h || 0;
+    const doubles = b.doubles || 0;
+    const triples = b.triples || 0;
+    const hr = b.hr || 0;
+    const singles = Math.max(0, h - doubles - triples - hr);
+    const ab = b.ab || 0;
+    const bb = b.bb || 0;
+    const hbp = b.hbp || 0;
+    const sf = b.sac || 0;
+    const tb = totalBases(b);
+    const obpDen = ab + bb + hbp + sf;
+    const wobaNum = 0.69 * bb + 0.72 * hbp + 0.88 * singles + 1.27 * doubles + 1.62 * triples + 2.10 * hr;
+    return {
+      pa: ab + bb + hbp + sf,
+      ab: ab,
+      r: b.r || 0,
+      h: h,
+      doubles: doubles,
+      triples: triples,
+      hr: hr,
+      rbi: b.rbi || 0,
+      sb: b.sb || 0,
+      cs: b.cs || 0,
+      bb: bb,
+      so: b.so || 0,
+      ba: ab ? h / ab : null,
+      obp: obpDen ? (h + bb + hbp) / obpDen : null,
+      slg: ab ? tb / ab : null,
+      roba: obpDen ? wobaNum / obpDen : null,
+      tb: tb,
+      gidp: b.gidp || 0,
+      hbp: hbp,
+      sh: 0,
+      sf: sf,
+      ibb: 0
+    };
+  }
+  function formatPlus(value) {
+    if (value == null || Number.isNaN(value)) return "—";
+    return String(Math.round(value));
+  }
+  function rosterStatCells(line, league) {
+    const ops = line.obp != null && line.slg != null ? line.obp + line.slg : null;
+    let opsPlus = null;
+    if (line.obp != null && line.slg != null && league.obp && league.slg) {
+      opsPlus = 100 * (line.obp / league.obp + line.slg / league.slg - 1);
     }
-    const bat = lines.bat;
+    let rbat = null;
+    if (line.roba != null && league.roba != null && league.pa && league.r) {
+      const per = league.r / league.pa;
+      rbat = 100 * (((line.roba - league.roba) / 1.25 + per) / per);
+    }
+    const rate = (value) => value == null ? "—" : formatRate(value, 1);
     return [
-      { value: formatAvg(bat.h, bat.ab), label: "AVG" },
-      { value: formatRate(totalBases(bat), bat.ab), label: "SLG" },
-      { value: formatRate((bat.h || 0) + (bat.bb || 0) + (bat.hbp || 0), (bat.ab || 0) + (bat.bb || 0) + (bat.hbp || 0) + (bat.sac || 0)), label: "OBP" },
-      { value: String(bat.h || 0), label: "H" }
+      line.pa, line.ab, line.r, line.h, line.doubles, line.triples, line.hr, line.rbi,
+      line.sb, line.cs, line.bb, line.so,
+      line.ba == null ? "—" : formatAvg(line.h, line.ab),
+      rate(line.obp), rate(line.slg), rate(ops), formatPlus(opsPlus), rate(line.roba), formatPlus(rbat),
+      line.tb, line.gidp, line.hbp, line.sh, line.sf, line.ibb
     ];
   }
   function updateRosterGlance() {
     const games = profileGames();
+    const team = blankLine();
+    roster.forEach((guy) => {
+      if (!(guy.name || "").trim()) return;
+      const bat = tallyPlayer(guy, games).bat;
+      ["ab", "r", "h", "doubles", "triples", "hr", "rbi", "bb", "so", "hbp", "sac", "sb", "cs", "gidp"].forEach((field) => {
+        team[field] += bat[field] || 0;
+      });
+    });
+    const league = rateParts(team);
     [...$("roster-body").querySelectorAll("tr")].forEach((tr, index) => {
       const guy = roster[index];
       if (!guy) return;
@@ -3879,10 +3837,9 @@
         cell.innerHTML = "";
         cell.appendChild(rosterNameInput(guy, cell));
       }
-      const bits = rosterGlanceBits(guy, tallyPlayer(guy, games));
-      tr.querySelectorAll("td.glance").forEach((cell, i) => {
-        const bit = bits[i];
-        cell.innerHTML = bit ? "<b>" + esc(String(bit.value)) + "</b><span>" + esc(bit.label) + "</span>" : "";
+      const cells = rosterStatCells(named ? rateParts(tallyPlayer(guy, games).bat) : rateParts(blankLine()), league);
+      tr.querySelectorAll("td.bat").forEach((cell, i) => {
+        cell.textContent = named ? cells[i] : "";
       });
     });
   }
@@ -4058,7 +4015,7 @@
     return games;
   }
   function blankLine() {
-    return { g: 0, ab: 0, r: 0, h: 0, doubles: 0, triples: 0, hr: 0, rbi: 0, bb: 0, so: 0, hbp: 0, sac: 0, sb: 0, cs: 0, outs: 0, er: 0, pitches: 0 };
+    return { g: 0, ab: 0, r: 0, h: 0, doubles: 0, triples: 0, hr: 0, rbi: 0, bb: 0, so: 0, hbp: 0, sac: 0, sb: 0, cs: 0, gidp: 0, outs: 0, er: 0, pitches: 0 };
   }
   function addLine(tot, src, fields) {
     tot.g += 1;
@@ -4074,7 +4031,7 @@
     (games || profileGames()).forEach((g) => {
       const b = (g.batters || []).find((p) => sameRosterPlayer(p, guy));
       const arm = (g.pitchers || []).find((p) => sameRosterPlayer(p, guy));
-      if (b) addLine(bat, b, ["ab", "r", "h", "doubles", "triples", "hr", "rbi", "bb", "so", "hbp", "sac", "sb", "cs"]);
+      if (b) addLine(bat, b, ["ab", "r", "h", "doubles", "triples", "hr", "rbi", "bb", "so", "hbp", "sac", "sb", "cs", "gidp"]);
       if (arm) addLine(pit, arm, ["outs", "h", "r", "er", "bb", "so", "pitches"]);
       if (b || arm) rows.push({ game: g, bat: b || null, pit: arm || null });
     });
@@ -4375,7 +4332,7 @@
     const slimB = (b) => ({
       id: b.id, rosterId: b.rosterId || "", name: b.name, number: b.number, pos: b.pos,
       ab: b.ab, r: b.r, h: b.h, doubles: b.doubles, triples: b.triples, hr: b.hr,
-      rbi: b.rbi, bb: b.bb, so: b.so, hbp: b.hbp, sac: b.sac, sb: b.sb, cs: b.cs
+      rbi: b.rbi, bb: b.bb, so: b.so, hbp: b.hbp, sac: b.sac, sb: b.sb, cs: b.cs, gidp: b.gidp || 0
     });
     return {
       id: state.gameId,
@@ -4608,14 +4565,12 @@
   $("tab-play").addEventListener("click", () => showTab("play"));
   $("tab-roster").addEventListener("click", () => showTab("roster"));
   $("tab-book").addEventListener("click", () => showTab("book"));
-  $("tab-ranks").addEventListener("click", () => showTab("ranks"));
   $("tab-league").addEventListener("click", () => showTab("league"));
   $("league-form").addEventListener("submit", (e) => {
     e.preventDefault();
     addLeagueTeam($("league-name").value);
     $("league-name").value = "";
   });
-  $("rank-pick").addEventListener("change", paintRankings);
   $("log-toggle").addEventListener("click", () => {
     const list = $("log");
     const open = list.hidden;
@@ -4915,7 +4870,7 @@
     e.stopImmediatePropagation();
   }, true);
   document.addEventListener("change", (e) => {
-    if (canEdit() || e.target.id === "rank-pick" || (e.target.closest && e.target.closest("#gate"))) return;
+    if (canEdit() || (e.target.closest && e.target.closest("#gate"))) return;
     e.stopImmediatePropagation();
   }, true);
   $("gate-form").addEventListener("submit", (e) => {
