@@ -272,6 +272,7 @@
     color: #f4eee4;
     display: grid;
     place-items: center;
+    overflow: hidden;
     font-weight: 800;
     font-size: clamp(12px, 2.4cqw, 22px);
     letter-spacing: 0.04em;
@@ -679,6 +680,27 @@
     padding: 16px;
   }
   .profile-top { display: flex; justify-content: space-between; align-items: flex-start; gap: 12px; }
+  .profile-photo { display: flex; flex-direction: column; align-items: center; gap: 6px; flex: 0 0 auto; }
+  .face-btn {
+    width: 84px;
+    height: 84px;
+    border-radius: 50%;
+    border: 2px solid var(--black);
+    background: #fff;
+    padding: 0;
+    overflow: hidden;
+    display: grid;
+    place-items: center;
+  }
+  .face-btn img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    border-radius: 50%;
+    grid-area: 1 / 1;
+  }
+  .face-btn span { grid-area: 1 / 1; font-weight: 800; font-size: 28px; line-height: 1; }
+  body.watching .face-btn { cursor: default; }
   .profile-title {
     display: block;
     width: 100%;
@@ -1335,6 +1357,13 @@
   <div id="profile" class="profile" hidden>
     <div class="profile-card" role="dialog" aria-modal="true" aria-labelledby="profile-name">
       <div class="profile-top">
+        <div class="profile-photo">
+          <button type="button" class="face-btn" id="profile-photo-btn" aria-label="Player photo">
+            <img id="profile-photo" alt="" hidden>
+            <span id="profile-photo-fallback"></span>
+          </button>
+          <button type="button" class="mini" id="profile-photo-clear" hidden>Remove</button>
+        </div>
         <div>
           <div class="kicker" id="profile-kicker">Player</div>
           <input id="profile-name" class="profile-title" maxlength="24" aria-label="Name" autocomplete="off" spellcheck="false">
@@ -1342,6 +1371,7 @@
         </div>
         <button type="button" class="btn ghost" id="profile-close">Close</button>
       </div>
+      <input id="profile-photo-file" type="file" accept="image/*" hidden>
       <div id="profile-body"></div>
     </div>
   </div>
@@ -1459,7 +1489,13 @@
     }
   }
   function emptyRosterSlot(n) {
-    return { id: "r" + n, name: "", number: "", pos: "" };
+    return { id: "r" + n, name: "", number: "", pos: "", photo: "" };
+  }
+  function safePhoto(value) {
+    if (typeof value !== "string") return "";
+    if (!/^data:image\/(?:jpeg|png);base64,/.test(value)) return "";
+    if (value.length > 80000) return "";
+    return value;
   }
   function normalizeRoster(list) {
     const out = [];
@@ -1473,7 +1509,8 @@
         id: id,
         name: src.name || "",
         number: src.number || "",
-        pos: src.pos || ""
+        pos: src.pos || "",
+        photo: safePhoto(src.photo)
       });
     });
     let n = 1;
@@ -1498,9 +1535,10 @@
     }
   }
   function saveRoster() {
-    if (!canEdit() && !applyingRemote) return;
-    try { localStorage.setItem(ROSTER_KEY, JSON.stringify(roster)); } catch (e) { /* keep going */ }
+    if (!canEdit() && !applyingRemote) return false;
+    try { localStorage.setItem(ROSTER_KEY, JSON.stringify(roster)); } catch (e) { return false; }
     queueCloud();
+    return true;
   }
   function rosterLabel(guy) {
     const num = (guy.number || "").trim();
@@ -2106,6 +2144,7 @@
       || el.classList.contains("name-link")
       || el.classList.contains("roster-name")
       || el.id === "profile-close"
+      || el.id === "profile-photo-btn"
       || el.id === "copy"
       || el.id === "backup"
       || el.id === "log-toggle"
@@ -2262,6 +2301,25 @@
     el.classList.toggle("at-bat", !!opts.atBat);
     el.classList.toggle("is-up", !!opts.up);
     el.title = opts.title || "";
+    const mark = el.querySelector(".mark");
+    if (!mark) return;
+    let icon = mark.querySelector(".mark-icon");
+    if (opts.icon) {
+      if (!icon) {
+        icon = document.createElement("img");
+        icon.className = "mark-icon";
+        icon.alt = "";
+        mark.appendChild(icon);
+      }
+      if (icon.getAttribute("src") !== opts.icon) icon.src = opts.icon;
+    } else if (icon) {
+      icon.remove();
+    }
+  }
+  function playerPhoto(person) {
+    if (!person || !person.rosterId) return "";
+    const guy = roster.find((r) => r.id === person.rosterId);
+    return guy ? safePhoto(guy.photo) : "";
   }
   function paintField(pomfretUp, batter, pit) {
     const posNum = { P: "1", C: "2", "1B": "3", "2B": "4", "3B": "5", SS: "6", LF: "7", CF: "8", RF: "9" };
@@ -2289,6 +2347,7 @@
         name: named ? (shortName(person) || pos) : "",
         filled: !!named,
         up: !!(pomfretUp && batter && batter.pos === pos),
+        icon: named ? playerPhoto(person) : "",
         title: named
           ? pos + " · " + ((person.number ? "#" + person.number + " " : "") + ((person.name || "").trim() || pos))
           : pos
@@ -2308,6 +2367,7 @@
           num: (runner.number || "").trim() || (spot >= 0 ? String(spot + 1) : "•"),
           name: shortName(runner) || label,
           on: true,
+          icon: playerPhoto(runner),
           title: "On " + bag[n] + ": " + label
         });
       } else if (id) {
@@ -2326,6 +2386,7 @@
         name: shortName(up) || (oppUp ? "At bat" : (up.pos || "At bat")),
         filled: true,
         atBat: true,
+        icon: playerPhoto(up),
         title: "At bat: " + playerLabel(up, upIndex)
       });
     } else {
@@ -3772,6 +3833,7 @@
     $("profile-kicker").textContent = guy.pos ? guy.pos : "Player";
     if (document.activeElement !== $("profile-name")) $("profile-name").value = name;
     $("profile-meta").textContent = [num ? "#" + num : "", "Pomfret Griffins"].filter(Boolean).join(" · ");
+    paintProfilePhoto(guy);
     const lines = tallyPlayer(guy);
     const bat = lines.bat;
     const pit = lines.pit;
@@ -3819,6 +3881,68 @@
       html += "</tbody></table></div>";
     }
     body.innerHTML = html;
+  }
+  function paintProfilePhoto(guy) {
+    const photo = safePhoto(guy.photo);
+    const img = $("profile-photo");
+    const fallback = $("profile-photo-fallback");
+    const btn = $("profile-photo-btn");
+    if (photo) {
+      img.hidden = false;
+      if (img.getAttribute("src") !== photo) img.src = photo;
+      fallback.hidden = true;
+    } else {
+      img.hidden = true;
+      img.removeAttribute("src");
+      fallback.hidden = false;
+      fallback.textContent = (guy.number || "").trim() || (guy.name || "?").trim().slice(0, 1).toUpperCase();
+    }
+    $("profile-photo-clear").hidden = !photo || !canEdit();
+    btn.setAttribute("aria-label", canEdit() ? (photo ? "Change photo" : "Add a photo") : "Player photo");
+  }
+  async function cropPhotoFile(file) {
+    const bitmap = await createImageBitmap(file);
+    try {
+      const size = 160;
+      const canvas = document.createElement("canvas");
+      canvas.width = size;
+      canvas.height = size;
+      const side = Math.min(bitmap.width, bitmap.height);
+      const sx = Math.round((bitmap.width - side) / 2);
+      const sy = Math.round((bitmap.height - side) / 2);
+      canvas.getContext("2d").drawImage(bitmap, sx, sy, side, side, 0, 0, size, size);
+      return canvas.toDataURL("image/jpeg", 0.82);
+    } finally {
+      bitmap.close();
+    }
+  }
+  async function setPlayerPhoto(guy, file) {
+    if (!canEdit() || !guy || !file) return;
+    if (!file.type || file.type.indexOf("image/") !== 0) { toast("Choose a picture"); return; }
+    const previous = guy.photo || "";
+    let data = "";
+    try { data = await cropPhotoFile(file); } catch (e) { data = ""; }
+    data = safePhoto(data);
+    if (!data) { toast("That picture could not be used"); return; }
+    guy.photo = data;
+    if (!saveRoster()) {
+      guy.photo = previous;
+      toast("That photo could not be saved on this phone");
+      return;
+    }
+    paint();
+    toast("Photo saved");
+  }
+  function clearPlayerPhoto(guy) {
+    if (!canEdit() || !guy || !guy.photo) return;
+    const previous = guy.photo;
+    guy.photo = "";
+    if (!saveRoster()) {
+      guy.photo = previous;
+      toast("The photo is still saved on this phone");
+      return;
+    }
+    paint();
   }
   function profileTable(headers, rows) {
     let html = "<div class='book-scroll'><table class='stats'><thead><tr>";
@@ -4135,6 +4259,20 @@
   $("profile-name").addEventListener("blur", () => {
     if ($("profile").hidden) return;
     rosterChanged();
+  });
+  $("profile-photo-btn").addEventListener("click", () => {
+    if (!canEdit()) return;
+    $("profile-photo-file").click();
+  });
+  $("profile-photo-file").addEventListener("change", () => {
+    const file = $("profile-photo-file").files && $("profile-photo-file").files[0];
+    $("profile-photo-file").value = "";
+    const guy = findRosterPlayer($("profile").dataset.id || "", $("profile").dataset.key || "");
+    if (file && guy) setPlayerPhoto(guy, file);
+  });
+  $("profile-photo-clear").addEventListener("click", () => {
+    const guy = findRosterPlayer($("profile").dataset.id || "", $("profile").dataset.key || "");
+    if (guy) clearPlayerPhoto(guy);
   });
   $("profile-close").addEventListener("click", closeProfile);
   $("sheet-print").addEventListener("click", () => window.print());
