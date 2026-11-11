@@ -522,7 +522,28 @@
   .stats { min-width: 640px; font-variant-numeric: tabular-nums; }
   .stats th, .stats td { text-align: right; padding: 4px 5px; border-bottom: 1px solid var(--line); white-space: nowrap; font-size: 15px; }
   .stats th { font-size: 11px; letter-spacing: 0.08em; text-transform: uppercase; color: var(--muted); font-weight: 800; }
-  .stats td.who, .stats th.who, .stats td.ord, .stats th.ord { text-align: left; }
+  .stats td.who, .stats th.who, .stats td.ord, .stats th.ord, .stats td.sit, .stats th.sit { text-align: left; }
+  .sit-toggle {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    margin: 0 0 10px;
+    padding: 0;
+    border: 0;
+    background: transparent;
+    text-align: left;
+  }
+  .sit-toggle .kicker { margin: 0; }
+  .sit-toggle::after {
+    content: "";
+    width: 12px;
+    height: 8px;
+    flex: 0 0 12px;
+    background: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 12 8'%3E%3Cpath fill='%23120d0c' d='M1 1l5 5 5-5'/%3E%3C/svg%3E") center / 12px 8px no-repeat;
+  }
+  .sit-toggle[aria-expanded="true"]::after { transform: rotate(180deg); }
+  .sit-panel[hidden] { display: none; }
+  .sit-note { margin: 0 0 8px; color: var(--muted); font-size: 13px; line-height: 1.35; }
   .stats input, .stats select {
     border: 0;
     background: transparent;
@@ -1547,11 +1568,21 @@
     bag.seq += 1;
     return "id" + bag.seq;
   }
+  const SIT_KEYS = ["empty", "on", "risp", "loaded", "two", "risp2", "late"];
+  function blankSitLine() {
+    return { ab: 0, h: 0, doubles: 0, triples: 0, hr: 0, rbi: 0, bb: 0, so: 0, hbp: 0, sac: 0 };
+  }
+  function blankSit() {
+    const sit = {};
+    SIT_KEYS.forEach((key) => { sit[key] = blankSitLine(); });
+    return sit;
+  }
   function blankBatter(bag, pos) {
     return {
       id: makeId(bag), name: "", number: "", pos: pos || "",
       ab: 0, r: 0, h: 0, doubles: 0, triples: 0, hr: 0, rbi: 0,
-      bb: 0, so: 0, hbp: 0, sac: 0, sb: 0, cs: 0, gidp: 0
+      bb: 0, so: 0, hbp: 0, sac: 0, sb: 0, cs: 0, gidp: 0,
+      sit: blankSit()
     };
   }
   function blankPitcher(bag) {
@@ -1919,6 +1950,57 @@
     const b = plateBatter();
     return b ? b.id : makeId(state);
   }
+  function closeAndLate() {
+    if ((state.inning || 1) < 6) return false;
+    const ahead = sum(state.runs[battingTeam()] || []);
+    const behind = sum(state.runs[fieldingTeam()] || []);
+    const lead = ahead - behind;
+    if (lead === 0 || lead === 1) return true;
+    if (lead > 1) return false;
+    const runners = (state.bases || []).filter(Boolean).length;
+    return behind - ahead <= runners + 2;
+  }
+  function situationKeys() {
+    const bases = state.bases || [];
+    const onFirst = bases[0] != null;
+    const onSecond = bases[1] != null;
+    const onThird = bases[2] != null;
+    const runners = onFirst || onSecond || onThird;
+    const scoring = onSecond || onThird;
+    const keys = [];
+    keys.push(runners ? "on" : "empty");
+    if (scoring) keys.push("risp");
+    if (onFirst && onSecond && onThird) keys.push("loaded");
+    if ((state.outs || 0) >= 2) keys.push("two");
+    if (scoring && (state.outs || 0) >= 2) keys.push("risp2");
+    if (closeAndLate()) keys.push("late");
+    return keys;
+  }
+  function ensureSit(b) {
+    if (!b.sit) b.sit = blankSit();
+    SIT_KEYS.forEach((key) => {
+      if (!b.sit[key]) b.sit[key] = blankSitLine();
+    });
+    return b.sit;
+  }
+  function addSituation(b, opts) {
+    if (!b || !opts) return;
+    const sit = ensureSit(b);
+    (state.playSit || []).forEach((key) => {
+      const row = sit[key];
+      if (!row) return;
+      if (opts.ab) row.ab += 1;
+      if (opts.hit) row.h += 1;
+      if (opts.extra === 2) row.doubles += 1;
+      if (opts.extra === 3) row.triples += 1;
+      if (opts.extra === 4) row.hr += 1;
+      if (opts.bb) row.bb += 1;
+      if (opts.so) row.so += 1;
+      if (opts.hbp) row.hbp += 1;
+      if (opts.sac) row.sac += 1;
+      if (opts.rbi) row.rbi = Math.max(0, (row.rbi || 0) + opts.rbi);
+    });
+  }
   function chargeCounting(opts) {
     const b = plateBatter();
     if (b) {
@@ -1931,6 +2013,7 @@
       if (opts.so) b.so += 1;
       if (opts.hbp) b.hbp += 1;
       if (opts.sac) b.sac += 1;
+      addSituation(b, opts);
     }
     if (!pomfretBatting()) {
       const p = currentPitcher();
@@ -1944,6 +2027,7 @@
     state.lastScored = [];
     state.rbiId = "";
     state.runEarned = true;
+    state.playSit = situationKeys();
   }
   function markRbi(allowRbi, earned) {
     const b = plateBatter();
@@ -1962,7 +2046,10 @@
     state.runs[battingTeam()][state.inning - 1] += ids.length;
     if (opts.rbi) {
       const b = opts.rbiPlayer || plateBatter();
-      if (b) b.rbi += ids.length;
+      if (b) {
+        b.rbi += ids.length;
+        addSituation(b, { rbi: ids.length });
+      }
     }
     if (!pomfretBatting()) {
       const pit = currentPitcher();
@@ -2341,7 +2428,10 @@
     if (state.runs[side][state.inning - 1] > 0) state.runs[side][state.inning - 1] -= 1;
     if (entry.rbi && state.rbiId) {
       const b = findPlayer(state.rbiId);
-      if (b && b.rbi > 0) b.rbi -= 1;
+      if (b && b.rbi > 0) {
+        b.rbi -= 1;
+        addSituation(b, { rbi: -1 });
+      }
     }
     if (!pomfretBatting()) {
       const pit = currentPitcher();
@@ -2403,6 +2493,7 @@
       || el.id === "copy"
       || el.id === "backup"
       || el.id === "log-toggle"
+      || el.classList.contains("sit-toggle")
       || el.id === "watch-leave"
       || el.id === "sign-out"
       || el.classList.contains("sheet-open")
@@ -2578,8 +2669,7 @@
   }
   function paintField(pomfretUp, batter, pit) {
     const posNum = { P: "1", C: "2", "1B": "3", "2B": "4", "3B": "5", SS: "6", LF: "7", CF: "8", RF: "9" };
-    const homeBatting = state.started && state.half === "bottom";
-    const numbersOnly = homeBatting || (state.started && pomfretUp);
+    const numbersOnly = state.started && pomfretUp;
     ["CF", "LF", "RF", "SS", "2B", "3B", "1B", "P", "C"].forEach((pos) => {
       const el = $("pos-" + pos);
       if (numbersOnly) {
@@ -4027,15 +4117,25 @@
   function tallyPlayer(guy, games) {
     const bat = blankLine();
     const pit = blankLine();
+    const sit = blankSit();
     const rows = [];
     (games || profileGames()).forEach((g) => {
       const b = (g.batters || []).find((p) => sameRosterPlayer(p, guy));
       const arm = (g.pitchers || []).find((p) => sameRosterPlayer(p, guy));
       if (b) addLine(bat, b, ["ab", "r", "h", "doubles", "triples", "hr", "rbi", "bb", "so", "hbp", "sac", "sb", "cs", "gidp"]);
+      if (b && b.sit) {
+        SIT_KEYS.forEach((key) => {
+          const src = b.sit[key] || {};
+          const row = sit[key];
+          ["ab", "h", "doubles", "triples", "hr", "rbi", "bb", "so", "hbp", "sac"].forEach((field) => {
+            row[field] += src[field] || 0;
+          });
+        });
+      }
       if (arm) addLine(pit, arm, ["outs", "h", "r", "er", "bb", "so", "pitches"]);
       if (b || arm) rows.push({ game: g, bat: b || null, pit: arm || null });
     });
-    return { bat, pit, games: rows };
+    return { bat, pit, games: rows, sit };
   }
   function openProfile(rosterId, key) {
     const guy = findRosterPlayer(rosterId, key);
@@ -4071,10 +4171,16 @@
       statBit(formatAvg(bat.h, bat.ab), "AVG") + statBit(obp, "OBP") + statBit(formatRate(totalBases(bat), bat.ab), "SLG") +
       statBit(formatOPS(bat), "OPS") + statBit(formatBABIP(bat), "BABIP") +
       "</div>";
-    html += profileTable(
-      ["G", "AB", "R", "H", "2B", "3B", "HR", "RBI", "BB", "SO", "HBP", "SAC", "SB", "CS"],
-      [[bat.g, bat.ab, bat.r, bat.h, bat.doubles, bat.triples, bat.hr, bat.rbi, bat.bb, bat.so, bat.hbp, bat.sac, bat.sb, bat.cs]]
-    );
+      html += profileTable(
+        ["G", "AB", "R", "H", "2B", "3B", "HR", "RBI", "BB", "SO", "HBP", "SAC", "SB", "CS"],
+        [[bat.g, bat.ab, bat.r, bat.h, bat.doubles, bat.triples, bat.hr, bat.rbi, bat.bb, bat.so, bat.hbp, bat.sac, bat.sb, bat.cs]]
+      );
+    const sitOpen = $("sit-toggle") && $("sit-toggle").getAttribute("aria-expanded") === "true";
+    html += "<button type='button' class='sit-toggle' id='sit-toggle' aria-expanded='" + (sitOpen ? "true" : "false") + "' aria-controls='sit-panel'><span class='kicker'>Situational</span></button>";
+    html += "<div class='sit-panel' id='sit-panel'" + (sitOpen ? "" : " hidden") + ">";
+    html += "<p class='sit-note'>Each line uses the bases, the outs, and the score at the plate appearance. Games already in the book stay in the batting line above.</p>";
+    html += situationalTable(lines.sit);
+    html += "</div>";
     const pitched = pit.g > 0;
     if (pitched) {
       html += "<div class='kicker'>Pitching</div><div class='slash'>" +
@@ -4277,6 +4383,45 @@
     paint();
     if (!$("camera").hidden) openPhotoStage();
   }
+  function sitRateCells(row) {
+    const h = row.h || 0;
+    const ab = row.ab || 0;
+    const bb = row.bb || 0;
+    const hbp = row.hbp || 0;
+    const sf = row.sac || 0;
+    const pa = ab + bb + hbp + sf;
+    const obpDen = pa;
+    const obp = obpDen ? (h + bb + hbp) / obpDen : null;
+    const slg = ab ? totalBases(row) / ab : null;
+    const rate = (value) => {
+      if (value == null) return "—";
+      return value >= 1 ? value.toFixed(3) : value.toFixed(3).slice(1);
+    };
+    return [pa, ab, h, row.hr || 0, row.rbi || 0, bb, row.so || 0, formatAvg(h, ab), rate(obp), rate(slg)];
+  }
+  function situationalTable(sit) {
+    const rows = [
+      ["empty", "Bases empty", "No runners on base"],
+      ["on", "Runners on", "A runner on any base"],
+      ["risp", "Scoring position", "A runner on second or third"],
+      ["loaded", "Bases loaded", "Runners on first, second, and third"],
+      ["two", "2 outs", "The plate appearance started with two outs"],
+      ["risp2", "Scoring position, 2 outs", "A runner in scoring position and two outs"],
+      ["late", "Close & late", "Sixth inning or later, with the batting team tied, ahead by one, or the tying run on base, at bat, or on deck"]
+    ];
+    let html = "<div class='book-scroll'><table class='stats'><thead><tr><th class='sit'>Situation</th>";
+    ["PA", "AB", "H", "HR", "RBI", "BB", "SO", "BA", "OBP", "SLG"].forEach((header) => {
+      html += "<th>" + header + "</th>";
+    });
+    html += "</tr></thead><tbody>";
+    rows.forEach((spec) => {
+      const cells = sitRateCells((sit && sit[spec[0]]) || blankSitLine());
+      html += "<tr><td class='sit' title='" + esc(spec[2]) + "'>" + esc(spec[1]) + "</td>";
+      cells.forEach((cell) => { html += "<td>" + cell + "</td>"; });
+      html += "</tr>";
+    });
+    return html + "</tbody></table></div>";
+  }
   function profileTable(headers, rows) {
     let html = "<div class='book-scroll'><table class='stats'><thead><tr>";
     headers.forEach((h) => { html += "<th>" + h + "</th>"; });
@@ -4328,11 +4473,23 @@
     return String(s).replace(/[&<>"']/g, (c) => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" }[c]));
   }
 
+  function slimSit(sit) {
+    const out = {};
+    SIT_KEYS.forEach((key) => {
+      const row = (sit && sit[key]) || {};
+      out[key] = {
+        ab: row.ab || 0, h: row.h || 0, doubles: row.doubles || 0, triples: row.triples || 0, hr: row.hr || 0,
+        rbi: row.rbi || 0, bb: row.bb || 0, so: row.so || 0, hbp: row.hbp || 0, sac: row.sac || 0
+      };
+    });
+    return out;
+  }
   function gameSnapshot() {
     const slimB = (b) => ({
       id: b.id, rosterId: b.rosterId || "", name: b.name, number: b.number, pos: b.pos,
       ab: b.ab, r: b.r, h: b.h, doubles: b.doubles, triples: b.triples, hr: b.hr,
-      rbi: b.rbi, bb: b.bb, so: b.so, hbp: b.hbp, sac: b.sac, sb: b.sb, cs: b.cs, gidp: b.gidp || 0
+      rbi: b.rbi, bb: b.bb, so: b.so, hbp: b.hbp, sac: b.sac, sb: b.sb, cs: b.cs, gidp: b.gidp || 0,
+      sit: slimSit(b.sit)
     });
     return {
       id: state.gameId,
@@ -4576,6 +4733,15 @@
     const open = list.hidden;
     list.hidden = !open;
     $("log-toggle").setAttribute("aria-expanded", open ? "true" : "false");
+  });
+  $("profile").addEventListener("click", (e) => {
+    const btn = e.target.closest(".sit-toggle");
+    if (!btn) return;
+    const panel = $("sit-panel");
+    if (!panel) return;
+    const open = panel.hidden;
+    panel.hidden = !open;
+    btn.setAttribute("aria-expanded", open ? "true" : "false");
   });
   $("profile-name").addEventListener("input", () => {
     const guy = findRosterPlayer($("profile").dataset.id || "", $("profile").dataset.key || "");
